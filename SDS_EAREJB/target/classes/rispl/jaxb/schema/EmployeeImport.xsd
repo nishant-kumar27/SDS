@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+/* ===========================================================================
+* Copyright (c) 2009, 2013, Oracle and/or its affiliates. All rights reserved. 
+ * ===========================================================================
+ * $Header: rgbustores/internal/DIMP/Employee/EmployeeImport.xsd /main/7 2013/02/05 16:41:06 cgreene Exp $
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED    (MM/DD/YY)
+ *    cgreene   02/05/13 - rename common.xsd to CommonImport.xsd
+ *    abondala  01/02/10 - Update Header date
+ *
+ * ===========================================================================
+ */
+-->
+<!--
+/* ===========================================================================
+* Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved. 
+ * ===========================================================================
+ * $Header: rgbustores/internal/DIMP/Employee/EmployeeImport.xsd /main/7 2013/02/05 16:41:06 cgreene Exp $
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED    (MM/DD/YY)
+ *    blarsen   08/13/09 - Renamed ID_type to EmployeeID_type and renemed
+ *                         FillType_type to FillType_subtype to avoid a
+ *                         collisions with CommonImport.xsd.
+ *    cgreene   11/19/08 - migrate common types to ../CommonImport.xsd
+ *
+ * ===========================================================================
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xs:annotation><xs:documentation>
+			Employee Import Schema. Copyright 2006 Oracle. All rights reserved.
+	</xs:documentation></xs:annotation>
+
+	<xs:include schemaLocation="CommonImport.xsd"></xs:include>
+	<xs:element name="EmployeeImport" type="EmployeeImport_type">
+		<xs:annotation><xs:documentation>
+			Top-level element holding a collection of Employee elements.
+		</xs:documentation></xs:annotation>
+	</xs:element>
+
+	<xs:complexType name="EmployeeImport_type">
+		<xs:sequence>
+			<xs:element name="Employee" type="Employee_type" minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="FillType" type="FillType_type" use="required"/>
+	<xs:attribute name="CreationDate" type="xs:dateTime"/>
+	<xs:attribute name="ExpirationDate" type="xs:dateTime"/>
+	<xs:attribute name="Version" type="xs:string"/>
+	<xs:attribute name="Priority" type="xs:int"/>
+	<xs:attribute name="Batch" type="xs:int"/>
+	</xs:complexType>
+
+	<xs:complexType name="Employee_type">
+		<xs:annotation><xs:documentation>
+			Represents a single employee's information.
+		</xs:documentation></xs:annotation>
+		<xs:sequence>
+			<xs:element name="ChangeType" type="ChangeType_type" default="ADD" minOccurs="1" maxOccurs="1" />
+			<xs:element name="EmployeeID" type="EmployeeID_type" minOccurs="1" maxOccurs="1" />
+			<xs:element name="EmployeeFirstName" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element name="EmployeeLastName" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element name="EmployeeMiddleName" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element name="EmployeeFullName" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element name="EmployeeSSN" type="SSN_type" minOccurs="0" maxOccurs="1" />
+			<xs:element name="EmployeeRole" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element name="PartyID" type="xs:int" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Email" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element name="StatusCode" type="StatusCode_type" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Locale" type="ID_type" minOccurs="0" maxOccurs="1" />
+			<xs:element name="MerchandiseAssociation" type="MerchandiseAssociation_type" minOccurs="0" maxOccurs="1">
+				<xs:annotation><xs:documentation>
+					Holds Association between Employee and Merchandise Hierarchy (Divison / Department)
+					Custom Tag Added Especially for SDS
+				</xs:documentation></xs:annotation>
+			</xs:element>
+			<xs:element name="EmployeeAccess" type="EmployeeAccess_type" minOccurs="0" maxOccurs="1" />
+			<xs:element name="EmployeeType" type="StatusCode_type">
+				<xs:annotation><xs:documentation>
+					0 means 'Standard' employee, 1 means Temporary employee
+				</xs:documentation></xs:annotation>
+			</xs:element>
+			<xs:element name="NumberDaysValid" type="xs:int" minOccurs="0" maxOccurs="1">
+				<xs:annotation><xs:documentation>
+					Only applies to temporary employee
+				</xs:documentation></xs:annotation>
+			</xs:element>
+			<xs:element name="TempEmployeeExpirationDate" type="xs:date" minOccurs="0" maxOccurs="1">
+				<xs:annotation><xs:documentation>
+					Only applies to temporary employee
+				</xs:documentation></xs:annotation>
+			</xs:element>
+			<xs:element name="EmployeeStoreOrHierarchyAssn" type="EmployeeStoreOrHierarchyAssn_type" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="EmployeeID_type">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="10" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="SSN_type">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="9" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="StatusCode_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="0" />
+			<xs:enumeration value="1" />
+		</xs:restriction>
+	</xs:simpleType>
+	<!-- Custom Tag Addition Code Start -->
+	<xs:complexType name="MerchandiseAssociation_type">
+		<xs:annotation><xs:documentation>
+					Holds Association between Employee and Merchandise Hierarchy (Divison / Department)
+					Custom Tag Added Especially for SDS
+		</xs:documentation></xs:annotation>
+		<xs:sequence>
+			<xs:element name="MerchID" type="MerchID_type" minOccurs="1" maxOccurs="unbounded">				
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="MerchID_type">		
+		<xs:sequence>
+			<xs:element name="ChildID" type="ChildID_type" minOccurs="0" maxOccurs="unbounded">
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="ParentLevelId" type="xs:string"/>
+	</xs:complexType>
+	<xs:simpleType name="ChildID_type">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="10" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- Custom Tag Addition Code End -->
+	<xs:complexType name="EmployeeAccess_type">
+		<xs:annotation><xs:documentation>
+			Holds all information regarding access to the system.
+		</xs:documentation></xs:annotation>
+		<xs:sequence>
+			<xs:element name="EmployeeLoginID" type="xs:string" />
+			<xs:element name="AccessPassword" type="xs:string" />
+			<xs:element name="WorkGroupID" type="xs:int" />
+			<xs:element name="EmployeeAltID" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element name="NewPasswordRequired" type="xs:boolean" />
+			<xs:element name="PasswordCreationDate" type="xs:dateTime" />
+			<xs:element name="PasswordHistory" type="PasswordHistory_type" minOccurs="0" maxOccurs="1">
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="PasswordHistory_type">
+		<xs:sequence>
+			<xs:element name="PasswordHistoryEntry" type="PasswordHistoryEntry_type" minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="PasswordHistoryEntry_type">
+		<xs:annotation><xs:documentation>
+			Holds a single password history entry.
+		</xs:documentation></xs:annotation>
+		<xs:sequence>
+			<xs:element name="PasswordCreationDate" type="xs:dateTime" />
+			<xs:element name="AccessPassword" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="EmployeeStoreOrHierarchyAssn_type">
+		<xs:annotation><xs:documentation>
+			Holds an employee association to a store and/or a hierarchy node. Generally, only one of the
+			enclosed elements is provided; however, there may be cases where an employee needs both a store
+			association and a hierarchy association, so a sequence with optional elements is used instead of
+			a choice.
+		</xs:documentation></xs:annotation>
+		<xs:sequence>
+			<xs:element name="EmployeeStoreID" type="RetailStoreId_type" minOccurs="0" maxOccurs="1" />
+			<xs:element name="EmployeeHierarchyAssn" type="EmployeeHierarchyAssn_type" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="EmployeeHierarchyAssn_type">
+		<xs:sequence>
+			<xs:element name="NodeID" type="xs:string"  minOccurs="1" maxOccurs="1" />
+			<xs:element name="NodeType" type="xs:string"  minOccurs="1" maxOccurs="1" />
+			<xs:element name="StoreGroupFunctionID" type="xs:int"  minOccurs="1" maxOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+
+</xs:schema>

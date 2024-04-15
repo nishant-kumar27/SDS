@@ -1,0 +1,96 @@
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="admin" extends="login">
+		<action name="paramterConfig" class="com.rispl.sds.struts.parameter.ParameterAction" method="getParamterGroupElements">
+			<result name="success">/paramterConfig.jsp</result>
+			<result name="error">/paramterConfig.jsp</result>
+		</action>
+		
+		<action name="groupParamElement" class="com.rispl.sds.struts.parameter.ParameterAction" method="getSimpleParamterElement">
+			<result name="success">/paramterConfig.jsp</result>
+			<result name="error">/paramterConfig.jsp</result>
+		</action>
+		
+		<action name="updateXMLParameter" class="com.rispl.sds.struts.parameter.ParameterAction" method="updateXMLParameter">
+			<result name="success">/paramterConfig.jsp</result>
+			<result name="error">/paramterConfig.jsp</result>
+		</action>
+		
+		<action name="customerConfig" class="com.rispl.sds.struts.admin.action.CustomerConfigAction" method="execute">
+			<result name="success">/customerConfig.jsp</result>
+			<result name="error">/customerConfig.jsp</result>
+		</action>
+		
+		<action name="priorityCustomerSearch" class="com.rispl.sds.struts.admin.action.CustomerConfigAction" method="customerlookup">
+			<result name="success">/customerConfig.jsp</result>
+			<result name="error">/customerConfig.jsp</result>
+		</action>
+		
+		<action name="assignPriority" class="com.rispl.sds.struts.admin.action.CustomerConfigAction" method="updateCustomerPriorityAndSegment">
+			<result name="success">/customerConfig.jsp</result>
+			<result name="error">/customerConfig.jsp</result>
+		</action>
+		
+		<!-- <action name="assignSegmentCustomerSearch" class="com.rispl.sds.struts.admin.action.CustomerConfigAction" method="customerlookup1">
+			<result name="success">/customerConfig.jsp</result>
+			<result name="error">/customerConfig.jsp</result>
+		</action> -->
+		
+		<!-- <action name="assignSegment" class="com.rispl.sds.struts.admin.action.CustomerConfigAction" method="updateCustomerSegment">
+			<result name="success">/customerConfig.jsp</result>
+			<result name="error">/customerConfig.jsp</result>
+		</action> -->
+		
+		<action name="createNewSegment" class="com.rispl.sds.struts.admin.action.CustomerConfigAction" method="assignSegment">
+			<result name="success">/customerConfig.jsp</result>
+			<result name="error">/customerConfig.jsp</result>
+		</action>
+		
+		<action name="rolesConfig" class="com.rispl.sds.struts.admin.action.RolesSecurityAction" method="execute">
+			<result name="success">/rolesConfig.jsp</result>
+		</action>
+		
+		<action name="createRole" class="com.rispl.sds.struts.admin.action.RolesSecurityAction" method="createNewRole">
+			<result name="success">/rolesConfig.jsp</result>
+			<result name="error">/rolesConfig.jsp</result>
+		</action>
+		
+		<action name="assignHomePage" class="com.rispl.sds.struts.admin.action.RolesSecurityAction" method="updateHomePageBasedOnEmpRole">
+			<result name="success">/rolesConfig.jsp</result>
+			<result name="error">/rolesConfig.jsp</result>
+		</action>
+		
+		<action name="rolePermissionSearch" class="com.rispl.sds.struts.admin.action.RolesSecurityAction" method="fetchEmployeePermissionList">
+			<result name="success">/rolesConfig.jsp</result>
+			<result name="error">/rolesConfig.jsp</result>
+		</action>
+		
+		<action name="updateAccessPermission" class="com.rispl.sds.struts.admin.action.RolesSecurityAction" method="updateEmployeeRoleBasedPermisssion">
+			<result name="success">/rolesConfig.jsp</result>
+			<result name="error">/rolesConfig.jsp</result>
+		</action>
+		
+		
+	</package>
+	
+	<package name="reset-password" extends="sds-default">
+		<action name="resetPasswordPage">
+			<result>/resetPassword.jsp</result>
+		</action>
+		
+		<action name="lookupEmployee" class="rispl.ds.resetPassword.ResetPasswordAction" method="lookupEmployee">
+			<param name="overrideSecurityAction">resetPasswordPage</param>
+			<result name="*">/resetPassword.jsp</result>
+		</action>
+		
+		<action name="resetPassword" class="rispl.ds.resetPassword.ResetPasswordAction" method="resetPassword">
+			<param name="overrideSecurityAction">resetPasswordPage</param>
+			<result name="*">/resetPassword.jsp</result>
+		</action>
+		
+	</package>
+	
+	
+</struts>

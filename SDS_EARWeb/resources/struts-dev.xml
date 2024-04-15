@@ -1,0 +1,56 @@
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN" "http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+
+	<package name="sds-dev" extends="sds-default">
+
+		<!-- <action name="log">
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result>/log.jsp</result>
+		</action>
+		
+		<action name="emp" class="retailsols.DevAction" method="getEmp">
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result type="stream">
+				<param name="contentType">text/html</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+		
+		<action name="cust" class="retailsols.DevAction" method="getCust">
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result type="stream">
+				<param name="contentType">text/html</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+		
+		<action name="config" class="retailsols.DevAction" method="getConfig">
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result type="stream">
+				<param name="contentType">text/html</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action> -->
+		
+		<!-- <action name="testEmail" class="retailsols.DevAction" method="sendEmail"> 
+			<interceptor-ref name="authStack"></interceptor-ref> <result type="plainText"></result> 
+			</action> 
+
+		<action name="testEmbed">
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result>/testEmbed.jsp</result>
+		</action>
+
+		<action name="testEmbedStream" class="retailsols.DevAction"
+			method="testEmbed">
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result name="success" type="stream">
+				<param name="contentType">contentType</param>
+				<param name="inputName">inputStream</param>
+				<param name="contentDisposition">contentDisposition</param>
+			</result>
+		</action> -->
+	</package>
+
+
+</struts>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+/* ===========================================================================
+* Copyright (c) 2009, 2013, Oracle and/or its affiliates. All rights reserved. 
+ * ===========================================================================
+ * $Header: rgbustores/internal/DIMP/Currency/CurrencyImport.xsd /main/7 2013/02/05 16:41:06 cgreene Exp $
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED    (MM/DD/YY)
+ *    cgreene   02/05/13 - rename common.xsd to CommonImport.xsd
+ *    abondala  01/02/10 - Update Header date
+ *
+ * ===========================================================================
+ */
+-->
+<!--
+/* ===========================================================================
+* Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved. 
+ * ===========================================================================
+ * $Header: rgbustores/internal/DIMP/Currency/CurrencyImport.xsd /main/7 2013/02/05 16:41:06 cgreene Exp $
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED    (MM/DD/YY)
+ *    blarsen   08/13/09 - Renamed FillType_type to FillType_subtype to avoid a
+ *                         collision with CommonImport.xsd. Removed CurrencyCode_type
+ *                         since it collides with and is redundant to type of
+ *                         same name/restrictions in CommonImport.xsd.
+ *    lslepeti  01/15/09 - document expiration date must be one day after
+ *                         expiration.
+ *    cgreene   12/05/08 - add currency dimp FTs
+ *    cgreene   11/19/08 - migrate common types to ../CommonImport.xsd
+ *
+ * ===========================================================================
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xs:annotation><xs:documentation>
+		Currency Import Schema. Copyright 2008 Oracle. All rights reserved.
+	</xs:documentation></xs:annotation>
+
+	<xs:include schemaLocation="../CommonImport.xsd"></xs:include>
+	<xs:element name="CurrencyImport">
+		<xs:annotation><xs:documentation>
+			Top-level element holding a collection of Currency and
+			ExchangeRate elements.
+		</xs:documentation></xs:annotation>
+		<xs:complexType>
+		<xs:sequence>
+			<xs:element name="Currency" type="Currency_type" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="ExchangeRate" type="ExchangeRate_type" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="FillType" type="FillType_subtype" use="required" />
+		<xs:attribute name="CreationDate" type="xs:dateTime" />
+		<xs:attribute name="ExpirationDate" type="xs:dateTime" />
+		<xs:attribute name="Version" type="xs:string" />
+		<xs:attribute name="Priority" type="xs:int" />
+		<xs:attribute name="Batch" type="xs:int" />
+	</xs:complexType>
+	</xs:element>
+
+	
+
+	<xs:complexType name="Currency_type">
+		<xs:annotation><xs:documentation>
+			Represents a single currency's information. Note that IssuingCountryCode
+			and Priority are required for new adds.
+		</xs:documentation></xs:annotation>
+		<xs:attribute name="ChangeType" type="ChangeType_type" default="ADD"/>
+		<xs:attribute name="ISOCode" type="CurrencyCode_type" use="required"/>
+		<xs:attribute name="IssuingCountryCode" type="Code_type"/>
+		<xs:attribute name="Name" type="Description_type"/>
+		<xs:attribute name="IssuingCountryNationality" type="Name_type"/>
+		<xs:attribute name="IsBaseCurrency" type="xs:boolean" default="false"/>
+		<xs:attribute name="Scale" type="xs:int" default="2"/>
+		<xs:attribute name="Priority" type="xs:int"/>
+	</xs:complexType>
+
+	<xs:complexType name="ExchangeRate_type">
+		<xs:annotation><xs:documentation>
+			Represents a single exchange rate information. Note that EffectiveDate
+			and ExpirationDate are required for new adds. Because of the way exchange rate is 
+			queried, the expiration date must be the day after expiration.
+		</xs:documentation></xs:annotation>
+		<xs:attribute name="ChangeType" type="ChangeType_type" default="ADD"/>
+		<xs:attribute name="CurrencyCode" type="CurrencyCode_type" use="required"/>
+		<xs:attribute name="MinimumAmount" type="Amount_type"/>
+		<xs:attribute name="EffectiveDate" type="xs:date"/>
+		<xs:attribute name="ExpirationDate" type="xs:date"/>
+		<xs:attribute name="ToBuyAmount" type="Rate_type"/>
+		<xs:attribute name="ToSellAmount" type="Rate_type"/>
+		<xs:attribute name="ServiceFeeAmount" type="Amount_type"/>
+	</xs:complexType>
+
+	<xs:simpleType name="Rate_type">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="13"/>
+			<xs:fractionDigits value="6"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Code_type">
+	   <xs:annotation><xs:documentation>
+			ISO-3166 based four character code denoting which country issues
+			the Currency.
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="4"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="FillType_subtype">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="KillAndFill" />
+			<xs:enumeration value="FullIncremental" />
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

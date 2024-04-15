@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
+	<named-query name="CUSTOMER_LOOKUP_CUSTOMER_BY_ID_NAME">
+		<query>
+			Select customer from CustomerHeader customer 
+			where UPPER(customer.customerHeaderPK.custId) like :customerId or UPPER(customer.ctNm) like :custName 
+			ORDER BY customer.ctNm ASC
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_LOOKUP_CUSTOMER_EMP_LINKD">
+		<query>
+			Select customer from CustomerHeader customer 
+			where customer.emId = :empId and (UPPER(customer.customerHeaderPK.custId) like :customerId or UPPER(customer.ctNm) like :custName)
+			ORDER BY customer.ctNm ASC
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_LOOKUP_CUSTOMER_EMP_DIV">
+		<query>
+			Select customer from CustomerHeader customer 
+			where customer.divisionId IN :divIds and (UPPER(customer.customerHeaderPK.custId) like :customerId or UPPER(customer.ctNm) like :custName) 
+			ORDER BY customer.ctNm ASC
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_LOOKUP_CUSTOMER_BY_ID_ALL">
+		<query>
+			Select customer from CustomerHeader customer 
+			where customer.customerHeaderPK.custId like :customerId 
+			ORDER BY customer.ctNm ASC
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_LOOKUP_BY_CUSTOMERID_AND_DIVISIONID">
+		<query>
+			Select customer from CustomerHeader customer 
+			where customer.customerHeaderPK.custId like :customerId 
+			and customer.divisionId IN :merchId
+			ORDER BY customer.ctNm ASC
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_SITE_ADDRESS_BY_ADS_ID">
+		<query>
+			<![CDATA[ SELECT c FROM CustomerSiteAddress c WHERE c.customerSiteAddressPK.adsId = :adsId]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_ADDITIONAL_INFO">
+		<query>
+			<![CDATA[ Select customerSite from CustomerSite customerSite where customerSite.customerSitePK.custId=:customerId ]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_PENDING_INVOICES">
+		<query>
+			<![CDATA[ Select customerInvoice from CustomerSiteInvoice customerInvoice where customerInvoice.invStatus <> '2' and customerInvoice.refCustId=:customerId ]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_LOOKUP_CUSTOMER_BY_ID">
+		<query>
+			<![CDATA[ Select customer from CustomerHeader customer where customer.customerHeaderPK.custId = :customerId ]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="SEARCH_CUSTOMER_ARINV_NUM_ORD_ID">
+		<query>
+			<![CDATA[ SELECT invoice FROM CustomerSiteInvoice invoice WHERE  (invoice.orderNum = :orderId OR invoice.arInvNum=:invNumber ) ]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_LOOKUP_CUSTOMER_BY_NAME">
+		<query>
+			Select customer from CustomerHeader customer 
+			where UPPER(customer.ctNm) like :customerName
+			ORDER BY customer.ctNm ASC
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_LOOKUP_BY_CUSTOMERNAME_AND_DIVISIONID">
+		<query>
+			Select customer from CustomerHeader customer 
+			where UPPER(customer.ctNm) like :customerName
+			and customer.divisionId IN :merchId
+			ORDER BY customer.ctNm ASC
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_LOOKUP_CUSTOMER_BY_EMAIL_ID">
+		<query>
+			<![CDATA[ Select customer from CustomerHeader customer where customer.emId like :customerEmail ]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_LOOKUP_BY_PHONENUMBER">
+		<query>
+			<![CDATA[ select customer from CustomerHeader customer where customer.ctPhone like :customerContact ]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_SITE_INFO">
+		<query>
+			<![CDATA[ Select customerSite from CustomerSite customerSite where customerSite.customerSitePK.custSiteId=:siteId ]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_LIMIT_INFO">
+		<query>
+			<![CDATA[ SELECT customer FROM CustomerLimit customer WHERE customer.customerLimitPK.custId = :custId ]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_PAYMENT_TERMS">
+		<query>
+			<![CDATA[ SELECT c FROM CustomerPaymentTerm c WHERE c.custId = :custId ]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_ADDITIONAL_INFO_FOR_WMS">
+		<query>
+			<![CDATA[ Select customerSite from CustomerSite customerSite where customerSite.customerSitePK.custId=:customerId AND customerSite.customerSitePK.custSiteId=:customerSiteId ]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_RECEIPTS_LATEST">
+		<query>
+			<![CDATA[
+			SELECT r FROM RisplDkArPaym r 
+			where UPPER(r.custId)=?1
+			order by r.arPaymDate desc
+			]]>
+		</query>
+	</named-query>
+	<named-query name="CUSTOMER_CREDIT_MEMOS_LATEST">
+		<query>
+			<![CDATA[
+			SELECT c FROM RisplDkArCreditMemo c
+			WHERE UPPER(c.id.custId)=?1
+			ORDER BY c.crMemoDate DESC
+			]]>
+		</query>
+	</named-query>
+	<named-query name="SEARCH_CUSTOMER_RECEIPT">
+		<query>
+			<![CDATA[ SELECT receipt FROM RisplDkArPaym receipt where receipt.arPaymNum = :arPaymNum]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="GET_CUSOTMER_INVOICE">
+		<query>
+			<![CDATA[ SELECT invoice FROM OrderDetailsWithInvoice invoice where invoice.invoiceId = :invoiceId]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="GET_APPLIED_INVOICE">
+		<query>
+			<![CDATA[ SELECT invoice FROM OrderDetailsWithInvoice invoice where invoice.invoiceId = :invoiceId]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="CUSTOMER_STORE_NAME">
+		<query>
+			<![CDATA[SELECT strnme.nmLoc FROM RisplDkStrRtl strnme where strnme.id.rtStrId = :rtStrId]]>
+		</query>
+	</named-query>
+	<named-native-query name="CUSTOMER_PENDING_DUE_FROM_INVOICES">
+		<query>
+			select sum(inv_pend_amount) from rispl_dk_cust_site_inv where UPPER(cust_id)=?
+		</query>
+	</named-native-query>
+	<named-native-query name="CUSTOMER_OPEN_ORDERS">
+		<query>
+			<![CDATA[
+			SELECT PART1.ID_ORD,PART1.DKART_NET_TOT, PART1.DC_DY_ORD, PART1.SC_ORD  
+	FROM
+  (SELECT SUMM.ORD_ID_CT,SUMM.ID_ORD, SUMM.DKART_NET_TOT, HEAD.DC_DY_ORD, HEAD.SC_ORD    
+  FROM ORD_TRAN_HEADER HEAD INNER JOIN ORD_TRAN_SUM SUMM ON HEAD.RT_STR_ID  = SUMM.RT_STR_ID
+  AND HEAD.ORD_WS = SUMM.ORD_WS AND HEAD.TRN_SEQ   = SUMM.TRN_SEQ AND HEAD.DC_DY_ORD = SUMM.DC_DY_ORD
+  WHERE HEAD.ORD_TY IN ('23') AND HEAD.SC_TRAN   ='2' AND HEAD.SC_ORD <=4  
+  ORDER BY DC_DY_ORD DESC ) PART1
+  WHERE UPPER(PART1.ORD_ID_CT)=?
+  AND PART1.ID_ORD NOT IN ( SELECT SUMM.ID_ORD FROM ORD_TRAN_HEADER HDR
+  INNER JOIN ORD_TRAN_SUM SUMM ON HDR.RT_STR_ID  = SUMM.RT_STR_ID AND HDR.ORD_WS = SUMM.ORD_WS
+  AND HDR.TRN_SEQ = SUMM.TRN_SEQ AND HDR.DC_DY_ORD = SUMM.DC_DY_ORD WHERE HDR.ORD_TY IN ('25')
+  AND HDR.SC_ORD >= 8 AND HDR.SC_TRAN = '2')
+			]]>
+		</query>
+	</named-native-query>
+
+	<named-native-query name="CUSTOMER_NEW_ORDERS_TOTALS">
+		<query>
+			SELECT SUM(PART1.DKART_NET_TOT) FROM 
+			(SELECT SUMM.ORD_ID_CT,SUMM.ID_ORD, SUMM.DKART_NET_TOT, HEAD.DC_DY_ORD, HEAD.SC_ORD FROM ORD_TRAN_HEADER HEAD INNER JOIN ORD_TRAN_SUM SUMM 
+			ON HEAD.RT_STR_ID = SUMM.RT_STR_ID AND HEAD.ORD_WS = SUMM.ORD_WS AND HEAD.TRN_SEQ = SUMM.TRN_SEQ  AND HEAD.DC_DY_ORD = SUMM.DC_DY_ORD 
+			WHERE HEAD.ORD_TY IN ('23') AND HEAD.SC_TRAN='2' ORDER BY DC_DY_ORD DESC) PART1, 
+			(SELECT SUMM.ID_ORD, MAX(HEAD.SC_ORD) AS SC_ORD FROM ORD_TRAN_HEADER HEAD INNER JOIN ORD_TRAN_SUM SUMM 
+			ON HEAD.RT_STR_ID = SUMM.RT_STR_ID AND HEAD.ORD_WS = SUMM.ORD_WS AND HEAD.TRN_SEQ = SUMM.TRN_SEQ AND HEAD.DC_DY_ORD = SUMM.DC_DY_ORD 
+			WHERE HEAD.ORD_TY IN ('23','26','24') GROUP BY SUMM.ID_ORD) PART2 
+			WHERE PART1.ID_ORD = PART2.ID_ORD AND PART2.SC_ORD IN ('0') AND UPPER(PART1.ORD_ID_CT)=?
+		</query>
+	</named-native-query>
+
+	<named-native-query name="CUSTOMER_OPEN_ORDERS_TOTALS">
+		<query>
+			SELECT SUM(PART1.DKART_NET_TOT) FROM 
+			(SELECT SUMM.ORD_ID_CT,SUMM.ID_ORD, SUMM.DKART_NET_TOT, HEAD.DC_DY_ORD, HEAD.SC_ORD FROM ORD_TRAN_HEADER HEAD INNER JOIN ORD_TRAN_SUM SUMM 
+			ON HEAD.RT_STR_ID = SUMM.RT_STR_ID AND HEAD.ORD_WS = SUMM.ORD_WS AND HEAD.TRN_SEQ = SUMM.TRN_SEQ  AND HEAD.DC_DY_ORD = SUMM.DC_DY_ORD 
+			WHERE HEAD.ORD_TY IN ('23') AND HEAD.SC_TRAN='2' ORDER BY DC_DY_ORD DESC) PART1, 
+			(SELECT SUMM.ID_ORD, MAX(HEAD.SC_ORD) AS SC_ORD FROM ORD_TRAN_HEADER HEAD INNER JOIN ORD_TRAN_SUM SUMM 
+			ON HEAD.RT_STR_ID = SUMM.RT_STR_ID AND HEAD.ORD_WS = SUMM.ORD_WS AND HEAD.TRN_SEQ = SUMM.TRN_SEQ AND HEAD.DC_DY_ORD = SUMM.DC_DY_ORD 
+			WHERE HEAD.ORD_TY IN ('23','26','24','25') GROUP BY SUMM.ID_ORD) PART2 
+			WHERE PART1.ID_ORD = PART2.ID_ORD AND PART2.SC_ORD IN ('1') AND UPPER(PART1.ORD_ID_CT)=?
+		</query>
+	</named-native-query>
+
+
+	<named-native-query name="CUSTOMER_INPROG_ORDERS_TOTALS">
+		<query>
+			SELECT SUM(PART1.DKART_NET_TOT) FROM 
+			(SELECT SUMM.ORD_ID_CT,SUMM.ID_ORD, SUMM.DKART_NET_TOT, HEAD.DC_DY_ORD, HEAD.SC_ORD FROM ORD_TRAN_HEADER HEAD INNER JOIN ORD_TRAN_SUM SUMM 
+			ON HEAD.RT_STR_ID = SUMM.RT_STR_ID AND HEAD.ORD_WS = SUMM.ORD_WS AND HEAD.TRN_SEQ = SUMM.TRN_SEQ  AND HEAD.DC_DY_ORD = SUMM.DC_DY_ORD 
+			WHERE HEAD.ORD_TY IN ('23') AND HEAD.SC_TRAN='2' ORDER BY DC_DY_ORD DESC) PART1, 
+			(SELECT SUMM.ID_ORD, MAX(HEAD.SC_ORD) AS SC_ORD FROM ORD_TRAN_HEADER HEAD INNER JOIN ORD_TRAN_SUM SUMM 
+			ON HEAD.RT_STR_ID = SUMM.RT_STR_ID AND HEAD.ORD_WS = SUMM.ORD_WS AND HEAD.TRN_SEQ = SUMM.TRN_SEQ AND HEAD.DC_DY_ORD = SUMM.DC_DY_ORD 
+			WHERE HEAD.ORD_TY IN ('23','26','24') GROUP BY SUMM.ID_ORD) PART2
+			WHERE PART1.ID_ORD = PART2.ID_ORD AND PART2.SC_ORD IN ('2','3','4') AND UPPER(PART1.ORD_ID_CT)=?
+		</query>
+	</named-native-query>
+
+	<named-native-query name="CUSTOMER_CURRENT_INVOCES_TOTALS">
+		<query>
+			<![CDATA[
+			select SUM(inv_amount) from rispl_dk_cust_site_inv i 
+			where inv_status='1' AND (TRUNC(CURRENT_DATE) - AR_INV_DATE) <= (select PAY_IN from RISPL_DK_CUST_PYMT_TRMS t where i.CUST_ID = t.CUST_ID) 
+			AND UPPER(cust_id)=?
+			]]>
+			
+		</query>
+	</named-native-query>
+
+	<named-native-query name="CUSTOMER_OVERDUE_INVOCES_TOTALS">
+		<query>
+			<![CDATA[
+			select SUM(inv_amount) from rispl_dk_cust_site_inv i 
+			where inv_status='1' AND (TRUNC(CURRENT_DATE) - AR_INV_DATE) > (select PAY_IN from RISPL_DK_CUST_PYMT_TRMS t where i.CUST_ID = t.CUST_ID) 
+			AND UPPER(cust_id)=?
+			]]>
+		</query>
+	</named-native-query>
+</entity-mappings> 

@@ -1,0 +1,65 @@
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+<!-- the below tag is used to allow the size of uploaded slip upto 1GB -->
+<constant name="struts.multipart.maxSize" value="10000000" />
+<package name="payment"  extends="struts-default">
+	<action name="postPaymentSearch" class="rispl.ds.payment.Payment" method="paymentSearch">
+		<result name="success">payment_search.jsp</result>
+		<result type="redirectAction" name="logout">logout</result>
+	</action>
+	<action name="recordPayment" class="rispl.ds.payment.Payment" method="recordPayment">
+		<result name="success">payment.jsp</result>
+		<result type="redirectAction" name="none">postPaymentSearch</result>
+	</action>
+	<action name="donePayment" class="rispl.ds.payment.Payment" method="donePayment">
+		<result name="success">done_payment.jsp</result>
+	</action>
+	
+	<action name="addPayment" class="rispl.ds.payment.Payment" method="addTender">
+		<result name="success">payment.jsp</result>
+	<result name="input" type="redirectAction">addPayment</result> 
+		<result type="redirectAction" name="none">postPaymentSearch</result>
+	</action>
+	
+	<action name="deleteLineItem" class="rispl.ds.payment.Payment" method="deleteTender">
+		<result name="success">payment.jsp</result>
+		<result type="redirectAction" name="none">postPaymentSearch</result>
+	</action>
+	
+	<action name="paymntInvoiceSearchByCustomer" class="rispl.ds.invoice.Invoice" method="InvoiceSearchbyCustomer">
+			<result name="success">/payment_search.jsp</result>
+		</action>
+		<action name="paymntInvoiceSearchByOrder" class="rispl.ds.invoice.Invoice" method="invSearchByOrder">
+			<result name="success">/payment_search.jsp</result>
+		</action>
+	<action name="cancelPayment" class="rispl.ds.payment.Payment" method="cancelPayment">
+			<result name="success">/payment_search.jsp</result>
+		</action>
+	
+</package>
+<package name="payment_json_data" extends="json-default">
+	<action name="addTender" class="rispl.ds.payment.Payment" method="addTender">
+		<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="encoding">UTF-8</param>
+				<param name="noCache">true</param>
+			</result>
+	</action>
+	<action name="deleteTender" class="rispl.ds.payment.Payment" method="deleteTender">
+		<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="encoding">UTF-8</param>
+				<param name="noCache">true</param>
+			</result>
+	</action>
+	<action name="savePayment" class="rispl.ds.payment.Payment" method="savePayment">
+		<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="encoding">UTF-8</param>
+				<param name="noCache">true</param>
+			</result>
+	</action>
+</package>
+</struts>

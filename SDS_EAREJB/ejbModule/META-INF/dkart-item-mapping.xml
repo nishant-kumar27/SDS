@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
+	<named-query name="ITEM_MASTER_ITEM_ID">
+		<query>
+	select it from Item it	
+	where it.id.itmId= :itemId
+	and it.id.rtStrId= :storeId
+</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="ITEM_MASTER_UPC">
+		<query>
+	select it from Item it	
+	where it.id.idItmPos= :upcItemId
+	and it.id.rtStrId= :storeId
+	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="ITEM_MASTER_FIND_BY_ITEMID_POSITEMID">
+		<query>
+        SELECT it 
+        FROM Item it
+        WHERE it.id.rtStrId=:storeId
+        AND (it.id.idItmPos= :upcItemId
+        OR it.id.itmId= :itemId)order by it.itmRcrdCrtTs desc
+        </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="ITEM_MASTER_FIND_BY_ITEMID_POSITEMID_NSTR">
+		<query>
+        SELECT it 
+        FROM Item it
+        WHERE (it.id.idItmPos= :upcItemId
+        OR it.id.itmId= :itemId) order by it.itmRcrdCrtTs desc
+        </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="ITEM_MASTER_FOR_DISPLAY_POS_ID">
+		<query>
+		select distinct it.id.idItmPos,it.itmDesc from Item it
+		WHERE (it.id.rtStrId=:storeId or :storeId is null)
+		AND (it.id.idItmPos LIKE :upcItemId)  
+        </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="ITEM_MASTER_FOR_DISPLAY_LOV_ITEM_ID">
+		<query>
+		select distinct it.id.itmId,it.itmDesc from Item it
+		WHERE (it.id.rtStrId=:storeId or :storeId is null)
+		AND (it.id.itmId LIKE :itemId)     
+        </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="ITEM_MASTER_FOR_DISPLAY_LOV_DESC">
+		<query>
+		select distinct it.id.idItmPos,it.itmDesc from Item it
+		WHERE (it.id.rtStrId=:storeId or :storeId is null)
+		AND (UPPER(it.itmDesc) LIKE :itemDesc or it.id.idItmPos LIKE :idItmPos)	
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="ITEM_MASTER_FOR_SERVICE_ITEMS">
+	<query>
+	 SELECT it 
+        FROM Item it
+        WHERE (it.id.rtStrId=:storeId or :storeId is null)
+        AND (it.id.itmTyCd= :itemType)
+	</query>
+	<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+		<named-query name="ITEM_FOR_SHIPPING_METHODS">
+	<query>
+	 SELECT it 
+        FROM RisplShippmentMethodEntity it
+        WHERE it.routeStatus=:status
+	</query>
+	<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+</entity-mappings>

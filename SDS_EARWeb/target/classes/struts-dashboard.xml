@@ -1,0 +1,57 @@
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+	<package name="dashboard-actions" extends="sds-default">
+		<action name="dashboard" class="rispl.ds.dashboard.DashboardAction">
+			<result name="success">/dashboard.jsp</result>
+			<result name="error">/login.jsp</result>
+		</action>
+		<action name="orders_dashboard" class="rispl.ds.dashboard.OrdersDashboardAction">
+			<result name="success">/dash_orders.jsp</result>
+			<result name="failure">/dash_orders.jsp</result>
+		</action>
+		<action name="claims_dashboard" class="rispl.ds.dashboard.ClaimDashBoardAction">
+			<result>dash_claims.jsp</result>
+		</action>
+		<action name="collections_dashboard" class="rispl.ds.dashboard.CollectionsDashBoardAction">
+			<result>dash_collections.jsp</result>
+		</action>
+		<action name="invoices_dashboard" class="rispl.ds.dashboard.InvoiceDashBoardAction">
+			<result name="success">/dash_receivables.jsp</result>
+		</action>
+	</package>
+	
+	<package name="dashboard-json-data" extends="sds-default">
+		<default-interceptor-ref name="authStack"/>
+		
+		<action name="orders_dashboard_piechart_action" class="rispl.ds.dashboard.OrdersDashboardPieChartAction">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		<action name="receivables_dashboard_barchart_action"
+			class="rispl.ds.dashboard.ReceivablesDashboardBarChartAction">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		<action name="claims_dashboard_barchart_action" class="rispl.ds.dashboard.ClaimsDashboardBarChartAction">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		<action name="collections_dashboard_piechart_action"
+			class="rispl.ds.dashboard.CollectionsDashBoardBarChartAction">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+	</package>
+
+</struts>

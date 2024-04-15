@@ -1,0 +1,59 @@
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="login" extends="sds-default">
+
+		<action name="loginPage">
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result>/login.jsp</result>
+		</action>
+
+		<action name="login" class="rispl.ds.login.LoginAction">
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result name="success" type="redirect">homePage</result>
+			<result name="change" type="redirectAction">changepswd</result>
+			<result name="error">/login.jsp</result>
+			<result name="input">/login.jsp</result>
+		</action>
+
+		<action name="logout" class="rispl.ds.login.LoginAction"
+			method="logout">
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result name="success">/login.jsp</result>
+		</action>
+
+	</package>
+	
+	<package name="forgot-password" extends="sds-default">
+	
+		<action name="forgotPasswordPage">
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result>/forgotPassword.jsp</result>
+		</action>
+		
+		<action name="forgotPassword" class="rispl.ds.forgotpassword.ForgotPasswordAction">
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			<result name="error">/forgotPassword.jsp</result>
+			<result name="input">/forgotPassword.jsp</result>
+			<result name="success">/login.jsp</result>
+		</action>
+	
+	</package>
+	
+	<package name="override" extends="sds-default">
+
+		<action name="overrideCreditLimit" class="rispl.ds.login.LoginAction" method="overrideCreditLimit">
+			<interceptor-ref name="authStack"></interceptor-ref>
+			<result type="json">
+				
+			</result>
+		</action>
+		<!-- laxmikanth: ajax call for manager override -->
+		<action name="managerOverride" class="rispl.ds.login.LoginAction" method="managerOverride">
+			<interceptor-ref name="authStack"></interceptor-ref>
+			<result type="json"></result>
+		</action>
+	</package>
+
+</struts>

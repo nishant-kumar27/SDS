@@ -1,0 +1,320 @@
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+
+	<package name="newOrder" extends="sds-default">
+		
+		<action name="searchCustomerAction" class="rispl.ds.order.NewOrderAction">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="encoding">UTF-8</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		<action name="searchItemAction" class="rispl.ds.order.NewOrderAction"
+			method="searchItem">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="encoding">UTF-8</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		
+		<!-- Added By Veeresh Singh to validate LPO Number Duplicate -->
+		
+		<action name="validateLPONumberDuplicate" class="rispl.ds.order.NewOrderAction"
+			method="validateLPONumberDuplicate">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="encoding">UTF-8</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+
+		<!-- <action name=addItemAction class="rispl.ds.order.NewOrderAction" method="getItemDetails"> 
+			<result type="json"> <param name="excludeNullProperties">true</param> <param 
+			name="encoding">UTF-8</param> <param name="noCache">true</param> </result> 
+			</action> -->
+		<action name="addItemAction" class="rispl.ds.order.NewOrderAction"
+			method="itemDetails">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">			    
+					actionErrors.*,
+					actionMessages.*,
+					fieldErrors.*,
+					orderTran.*,
+					term,
+					qty,
+					availQty,
+					inventoryAvail,				
+					restockingFeeServiceitemId,
+					transportationFeeServiceitemId,
+					itemActiveIndex,
+					returnPriceFromExl					
+				</param>
+			</result>
+		</action>
+		<action name="pricelookup" class="rispl.ds.order.NewOrderAction" method="doPriceLookUp">
+			<interceptor-ref name="authStack"></interceptor-ref>
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					actionErrors.*,
+					actionMessages.*,
+					fieldErrors.*,
+					orderTran.*,
+					term,
+					qty,
+					availQty,
+					inventoryAvail,
+					price,
+					ItemPrice,
+					unitprice,
+					pluItem,					
+					restockingFeeServiceitemId,
+					transportationFeeServiceitemId,
+					itemActiveIndex,
+					exciseTax,
+					registryId				
+				</param>
+			</result>
+		</action>
+		
+		<action name="addServiceItemAction" class="rispl.ds.order.NewOrderAction"
+			method="serviceItemDetails">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					actionErrors.*,
+					actionMessages.*,
+					fieldErrors.*,
+					orderTran.*,
+					term,
+					qty,
+					availQty,
+					inventoryAvail,					
+					restockingFeeServiceitemId,
+					transportationFeeServiceitemId,
+					itemActiveIndex					
+				</param>
+			</result>
+		</action>
+		
+		
+		<action name="addInvItem" class="rispl.ds.order.NewOrderAction"
+			method="addInvItem">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					actionErrors.*,
+					actionMessages.*,
+					fieldErrors.*,
+					orderTran.*,
+					itemActiveIndex,				
+				</param>
+			</result>
+		</action>
+		<action name="clearPluItem" class="rispl.ds.order.NewOrderAction"
+			method="clearPluItem">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		<action name="deleteItem" class="rispl.ds.order.NewOrderAction"
+			method="deleteItem">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		<action name="quoteAction" class="rispl.ds.order.NewOrderAction"
+			method="quote">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		
+		<action name="quoteOrder" class="rispl.ds.order.NewOrderAction"
+			method="quote">
+			<result name="success">/ConfirmOrder.jsp</result>
+			
+		</action>
+		
+		<action name="getJSONResult" class="rispl.ds.order.NewOrderAction"
+			method="itemDetails">
+			<result type="json" />
+		</action>
+
+
+<!-- 		<action name="bookorder" class="rispl.ds.order.BookOrderAction">
+			<result name="success">/done.jsp</result>
+			<result name="failure">/login.jsp</result> mallikarjun-->
+			
+		<action name="bookorder" class="rispl.ds.order.BookOrderAction">
+			<!-- <result name="success">/done.jsp</result> -->
+			<result name="success" type="redirectAction">
+            <param name="actionName">orderDetailDisplay</param>
+            <param name="orderId">${orderId}</param>
+        </result>
+        <result name="failure">/login.jsp</result>
+        </action>
+        
+        <action name="orderDetailDisplay" class="rispl.ds.order.OrderSearchSummaryAction">
+			<result name="success">/BookOrder_detail.jsp</result>
+			<result name="failure">/customer_search.jsp</result>
+		</action>
+
+		<action name="updateItemDetails" class="rispl.ds.order.NewOrderAction"
+			method="updateItemDetails">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					actionErrors.*,
+					actionMessages.*,
+					fieldErrors.*,
+					orderTran.*,
+					itemActiveIndex,
+					enableDoubleDiscounts				
+				</param>
+			</result>
+		</action>
+		
+		<action name="updateTranLevelDiscountByPer" class="rispl.ds.order.NewOrderAction"
+			method="updateTranLevelDiscountByPer">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		<action name="updateTranLevelDiscountByAmt" class="rispl.ds.order.NewOrderAction"
+			method="updateTranLevelDiscountByAmt">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		
+		<action name="bookSalesOrder" class="rispl.ds.order.ConfirmSaleOrderAction">
+			<result name="success">/DoneSalesOrder.jsp</result>		
+			<result name="error">/DoneSalesOrder.jsp</result>
+			<result name="home" type="redirectAction">
+			<param name="actionName">homePage</param>
+			</result>		
+		</action>
+		<action name="SuppendSalesOrder" class="rispl.ds.order.ConfirmSaleOrderAction" method="suspendSalesOrder">
+			<result name="success">/DoneSalesOrder.jsp</result>
+			<result name="home" type="redirectAction">
+			<param name="actionName">homePage</param>
+			</result>			
+		</action>
+		<action name="CancelSalesOrder" class="rispl.ds.order.ConfirmSaleOrderAction" method="cancelSaleOrder">
+			<result name="success">/DoneSalesOrder.jsp</result>
+			<result name="home" type="redirectAction">
+			<param name="actionName">homePage</param>
+			</result>			
+		</action>
+		
+		
+			<action name="modifyTranlvlSlsAgnt" class="rispl.ds.order.NewOrderAction"
+			method="modifyTransactionSalesAgent">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					actionErrors.*,
+					actionMessages.*,
+					fieldErrors.*,
+					orderTran.*,				
+				</param>
+			</result>
+		</action>
+		
+		<action name="disableDoubleDiscs" class="rispl.ds.order.NewOrderAction" method="disableDoubleDiscs">
+		 <result type="json">
+		  <param name="excludeNullProperties"> true</param>
+		  <param name="noCache">true</param>	
+		 </result>		
+		</action>
+		
+		<action name="reloadOrdTran" class="rispl.ds.order.NewOrderAction" method="reloadOrdTran">
+			<interceptor-ref name="authStack"></interceptor-ref>
+			<result type="json">
+				<param name="excludeNullProperties"> true</param>
+				<param name="noCache">true</param>	
+			</result>		
+		</action>
+		
+		<action name="validateSalesOrderAjax" class="rispl.ds.order.ConfirmSaleOrderAction" 
+			method="validateSalesOrder">
+			<interceptor-ref name="authStack"></interceptor-ref>
+			<result name="input" type="json">
+		        <param name="ignoreHierarchy">false</param>
+		        <param name="includeProperties">actionErrors\[\d+\], fieldErrors\..+$, actionMessages\[\d+\]</param>
+		    </result>
+		    <result name="error" type="json">
+		        <param name="ignoreHierarchy">false</param>
+		        <param name="includeProperties">actionErrors\[\d+\], fieldErrors\..+$, actionMessages\[\d+\]</param>
+		    </result>
+		    <result name="success" type="json">
+		        <param name="ignoreHierarchy">false</param>
+		        <param name="includeProperties">actionErrors\[\d+\], fieldErrors\..+$, actionMessages\[\d+\]</param>
+		    </result>		
+		</action>
+		
+	</package>
+	
+	<package name="quoteOrder" extends="sds-default">
+		<action name="quoteOrderAction" class="rispl.ds.order.NewOrderAction"
+			method="quote">
+			<result name="success">/ConfirmOrder.jsp</result>
+			<result name="input" type="redirectAction">pendingOrder</result>
+			<result name="home" type="redirectAction">homePage</result>
+		</action>
+	
+	<action name="orderdetailmail" class="util.email.ConfirmOrderEmail" method="sendOrderEmail">
+     <result name="success">/ConfirmOrder.jsp</result>
+     <result name="error">/ConfirmOrder.jsp</result>
+     </action>
+        </package>
+
+	<package name="partial-shipping" extends="sds-default">
+		
+		<action name="partialShipping" class="rispl.ds.order.PartialShippingAction" method="partialShipping">
+			<result name="error,success" type="redirectAction">
+				<param name="actionName">orders_details_page</param>
+				<param name="orderId">${orderId}</param>
+				<param name="actionErrors">${actionErrors}</param>
+				<param name="actionMessages">${actionMessages}</param>
+			</result>
+		</action>
+	
+	</package>
+	<package name="InProgress_Order" extends="sds-default">
+		
+		<action name="inProgressOrder" class="rispl.ds.order.PartialShippingAction" method="inProgressOrderReopen">
+			<result name="error,success" type="redirectAction">
+				<param name="actionName">orders_details_page</param>
+				<param name="orderId">${orderId}</param>
+				<param name="actionErrors">${actionErrors}</param>
+				<param name="actionMessages">${actionMessages}</param>
+			</result>
+		</action>
+	
+	</package>
+</struts>

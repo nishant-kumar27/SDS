@@ -1,0 +1,19 @@
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="admin" extends="login">
+		<action name="paramterConfig" class="com.rispl.sds.struts.parameter.ParameterAction" method="getParamterGroupElements">
+			<result name="success">/paramterConfig.jsp</result>
+		</action>
+		
+		<action name="groupParamElement" class="com.rispl.sds.struts.parameter.ParameterAction" method="getSimpleParamterElement">
+			<result name="success">/paramterConfig.jsp</result>
+		</action>
+		
+		<action name="updateXMLParameter" class="com.rispl.sds.struts.parameter.ParameterAction" method="updateXMLParameter">
+			<result name="success">/paramterConfig.jsp</result>
+		</action>
+		
+	</package>
+</struts>

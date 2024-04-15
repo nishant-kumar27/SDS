@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/* ===========================================================================
+* Copyright (c) 2009, 2013, Oracle and/or its affiliates. All rights reserved. 
+ * ===========================================================================
+ * $Header: rgbustores/internal/DIMP/MerchandiseHierarchy/MerchandiseHierarchyImport.xsd /main/10 2013/02/05 16:41:06 cgreene Exp $
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED    (MM/DD/YY)
+ *    cgreene   02/05/13 - rename common.xsd to CommonImport.xsd
+ *    abondala  01/02/10 - Update Header date
+ *
+ * ===========================================================================
+ */
+-->
+<!--
+/* ===========================================================================
+* Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved. 
+ * ===========================================================================
+ * $Header: rgbustores/internal/DIMP/MerchandiseHierarchy/MerchandiseHierarchyImport.xsd /main/10 2013/02/05 16:41:06 cgreene Exp $
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED    (MM/DD/YY)
+ *    blarsen   08/13/09 - Renamed ChangeType_type to ChangeType_subtype and
+ *                         renamed FillType_type to FillType_subtype to avoid
+ *                         collisions with CommonImport.xsd.
+ *    glwang    02/18/09 - add LocalizedName element
+ *    cgreene   11/19/08 - migrate common types to ../CommonImport.xsd
+ *
+ * ===========================================================================
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:include schemaLocation="../CommonImport.xsd"></xs:include>
+	<xs:annotation><xs:documentation>
+		Merchandise Hierarchy Import Schema. Copyright 2006 Oracle.
+		All rights reserved.
+	</xs:documentation></xs:annotation>
+
+	<xs:element name="MerchandiseHierarchy">
+		<xs:annotation><xs:documentation>
+			Top level element containing the hierarchy and the data that must be
+			preloaded before the hierarchy.
+		</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PreloadData" type="PreloadData_type" minOccurs="0" maxOccurs="1">
+					<xs:annotation><xs:documentation>
+						The data that must be preloaded into the datasource before
+						the actual hierarchy is persisted. Consists of departments
+						and merchandise groups.
+					</xs:documentation></xs:annotation>
+				</xs:element>
+				<xs:element name="HierarchyList" type="HierarchyList_type" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation><xs:documentation>
+						The actual merchandise hierarchy data being imported.
+						Contains a grouping (list) of hierarchies.
+					</xs:documentation></xs:annotation>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="FillType" type="FillType_subtype" use="required"/>
+			<xs:attribute name="CreationDate" type="xs:dateTime"/>
+			<xs:attribute name="ExpirationDate" type="xs:dateTime"/>
+			<xs:attribute name="Version" type="xs:string"/>
+			<xs:attribute name="Priority" type="xs:int"/>
+			<xs:attribute name="Batch" type="xs:int"/>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="PreloadData_type">
+		<xs:sequence>
+			<xs:element name="POSDepartment" type="POSDepartment_type" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="MerchandiseGroup" type="MerchandiseGroup_type" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="MerchandiseGroup_type">
+		<xs:sequence>
+			<xs:element name="ChangeType" type="ChangeType_subtype" minOccurs="1" maxOccurs="1" />
+			<xs:element name="ID" type="xs:string" minOccurs="1" maxOccurs="1" />
+			<xs:element name="Name" minOccurs="0" maxOccurs="1">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="120"></xs:maxLength>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="MerchantID" type="xs:int" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Description" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:element name="LocalizedNameDescription" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="POSDepartment_type">
+		<xs:sequence>
+			<xs:element name="ChangeType" type="ChangeType_subtype" minOccurs="1" maxOccurs="1" />
+			<xs:element name="POSDepartmentID" type="xs:string" minOccurs="1" maxOccurs="1" />
+			<xs:element name="ParentPOSDepartmentID" type="xs:string" minOccurs="0" maxOccurs="1" />
+			<xs:choice>
+			     <xs:annotation><xs:documentation>
+                       POSDepartmentName is deprecated as 13.1
+                 </xs:documentation></xs:annotation>
+			     <xs:element name="POSDepartmentName" type="LocalizedPOSDepartmentName_type" minOccurs="0" maxOccurs="unbounded" />
+			     <xs:element name="LocalizedName" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded" />
+			</xs:choice>
+			<xs:element name="DepartmentDefaultTaxGroup" type="xs:int" minOccurs="1" maxOccurs="1" />
+			<xs:element name="RetailStorePOSDepartment" type="RetailStorePOSDepartment_type" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+    <xs:complexType name="LocalizedPOSDepartmentName_type">
+        <xs:attribute name="Text" type="Name_type" />
+        <xs:attribute name="LanguageCode" type="Language_type"/>
+        <xs:attribute name="CountryCode" type="Country_type"/>
+    </xs:complexType>
+
+
+	<xs:complexType name="RetailStorePOSDepartment_type">
+		<xs:sequence>
+			<xs:element name="ChangeType" type="ChangeType_subtype" minOccurs="1" maxOccurs="1" />
+			<xs:element name="RetailStoreId" type="RetailStoreId_type" minOccurs="1" maxOccurs="1" />
+			<xs:element name="DefaultEntryCode" type="xs:string" minOccurs="1" maxOccurs="1" />
+			<xs:element name="EnabledFlag" type="xs:boolean" minOccurs="1" maxOccurs="1" />
+			<xs:element name="ListSortIndex" type="xs:int" minOccurs="1" maxOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="HierarchyList_type">
+		<xs:sequence>
+			<xs:element name="Hierarchy" type="Hierarchy_type" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Hierarchy_type">
+		<xs:sequence>
+    		        <xs:element name="LocalizedName" type="LocalizedNameDescription_type" maxOccurs="unbounded" minOccurs="0"/>
+			<xs:element name="LevelList" type="LevelList_type" minOccurs="0" maxOccurs="1" />
+			<xs:element name="NodeList" type="NodeList_type" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="FunctionID" type="xs:int" use="required" />
+		<xs:attribute name="Name" type="xs:string"/>
+	</xs:complexType>
+
+	<xs:complexType name="LevelList_type">
+		<xs:sequence>
+			<xs:element name="Level" type="Level_type" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="NodeList_type">
+		<xs:sequence>
+			<xs:element name="Node" type="Node_type" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Level_type">
+		<xs:sequence>
+			<xs:element name="LocalizedName" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="ID" type="xs:int" use="required" />
+		<xs:attribute name="Name" type="xs:string" />
+		<xs:attribute name="ParentID" type="xs:int">
+			<xs:annotation><xs:documentation>
+				If the parent id is missing, this is assumed to be the root.
+			</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="Node_type">
+		<xs:attribute name="ID" type="xs:string" use="required" />
+		<xs:attribute name="Name" type="xs:string" />
+		<xs:attribute name="LevelID" type="xs:int" use="required" />
+		<xs:attribute name="ParentNodeID" type="xs:string" />
+	</xs:complexType>
+
+	<xs:simpleType name="ChangeType_subtype">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="ADD" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="FillType_subtype">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="KillAndFill"/>
+			<xs:enumeration value="FullIncremental">
+				<xs:annotation><xs:documentation>
+					Usage of FullIncremental with a StoreHierarchyImport is
+					strictly restricted to the PreloadData elements. This means
+					only Regions, Districts and Stores can be ADDed, UPDated
+					or DELeted via FullIncremental. No HierarchyList elements
+					may be processed in this way.
+				</xs:documentation></xs:annotation>
+			</xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

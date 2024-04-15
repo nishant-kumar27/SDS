@@ -1,0 +1,580 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/* ===========================================================================
+* Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved. 
+ * ===========================================================================
+ * $Header: rgbustores/internal/DIMP/Item/ItemImport.xsd /main/23 2013/02/05 16:41:06 cgreene Exp $
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED        (MM/DD/YY)
+ *    cgreene   02/05/13 - reimplemented ADD and UPD for ItemImport for the
+ *                         sake of KillAndFill performance
+ *    yiqzhao   09/19/12 - Add related item association into item import (dimp
+ *                         for item).
+ *    jswan     05/03/12 - Modified to support Will Call feature.
+ *    sthallam  04/05/12 - Enhanced RPM Integration - Item Mod Classification
+ *    abondala  01/04/10 - fix header
+ *    cgreene   12/23/09 - make actual size code and table code restricted to
+ *                         digits per NRF
+ *    cgreene   12/18/09 - upgrade to 13.1 style localized imports
+ *    cgreene   12/18/09 - per Eatal reqs, default template to DEFAULT
+ *    mchellap  12/03/09 - Serialisation DIMP Changes
+ *    blarsen   08/13/09 - Renamed ChangeType_type to ChangeType_subtype to
+ *                         avoid a collision with CommonImport.xsd.
+ *    cgreene   03/27/09 - remove thumbnail image column from database
+ *    glwang    01/12/09 - fix the type of LocalizedNameDescription.
+ *    glwang    12/10/08 - Add a comment for RegularPrice element.
+ *    cgreene   11/24/08 - implement customer data import
+ *    cgreene   11/19/08 - migrate common types to ../CommonImport.xsd
+ *    mszekely  11/19/08 - Trigger test checkout - file content not changed
+ *    vikini    11/11/08 - Checked in ILRM specific tags for DIMP
+ *    glwang    11/10/08 - change the element names in xsd
+ *
+ * ===========================================================================
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:annotation><xs:documentation>
+        Item Import Schema. Copyright 2007 Oracle Inc. All rights reserved.
+
+        Use this schema in conjuction with a Oracle Store Systems Data Dictionary
+        and the relations between the element and attribute names should be
+        apparent.
+    </xs:documentation> </xs:annotation>
+
+    <xs:include schemaLocation="../CommonImport.xsd"></xs:include>
+    <xs:element name="ItemImport">
+        <xs:annotation><xs:documentation>
+            Top-level element holding a collection of Item records.
+        </xs:documentation></xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="PreloadData" type="PreloadData_type" minOccurs="0" maxOccurs="1"/>
+                <xs:element name="Item" type="Item_type" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="FillType" type="FillType_type" use="required"/>
+            <xs:attribute name="CreationDate" type="xs:dateTime"/>
+            <xs:attribute name="ExpirationDate" type="xs:dateTime"/>
+            <xs:attribute name="Version" type="xs:string"/>
+            <xs:attribute name="Priority" type="xs:int"/>
+            <xs:attribute name="Batch" type="xs:int"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="PreloadData_type">
+        <xs:sequence>
+            <xs:element name="Color" type="Color_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Size" type="Size_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Style" type="Style_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="UOM" type="UOM_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Manufacturer" type="Manufacturer_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="MerchandiseClassification" type="MerchandiseClassification_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Supplier" type="Supplier_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Message" type="DisplayMessage_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="DisplayMessage_type">
+        <xs:annotation>
+            <xs:documentation>Multiple Item Level Messages based on the type of Transaction</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:element name="MsgText" type="LocalizedMessageDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ID" type="xs:int" use="required"/>
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" default="UPS"/>
+    </xs:complexType>
+
+    <xs:complexType name="Color_type">
+        <xs:sequence>
+            <xs:annotation><xs:documentation>
+                A list of names and descriptions in different locale to this color.
+                If attributes Name/Description are defined simultaneously with
+                LocalizedNameDescription, they will be ignored.
+                The Names and Description attributes are deprecated for 13.1.
+            </xs:documentation></xs:annotation>
+            <xs:element name="LocalizedNameDescription" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" default="UPS"/>
+        <xs:attribute name="Code" type="Code_type" use="required"/>
+        <xs:attribute name="Description" type="Description_type"/>
+        <xs:attribute name="Names" type="Name_type"/>
+    </xs:complexType>
+
+    <xs:complexType name="Size_type">
+        <xs:sequence>
+            <xs:annotation><xs:documentation>
+                A list of names and descriptions in different locale to this size.
+                If attributes TableName, TableDesc, TypeDesc and ProportionDesc
+                are defined simultaneously with localizedSizeDescription, they will be ignored.
+                The TableName,TableDesc, TypeDesc and ProportionDesc are deprecated for 13.1.
+            </xs:documentation></xs:annotation>
+            <xs:element name="LocalizedSizeData" type="LocalizedItemSizeDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" default="UPS"/>
+        <xs:attribute name="Code" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="10"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="ProportionDesc" type="Description_type"/>
+        <xs:attribute name="TypeDesc" type="Name_type"/>
+        <xs:attribute name="ActualSizeCode">
+            <xs:simpleType>
+                <xs:annotation><xs:documentation>
+                    This simple code type is restricted to only accepted values
+                    from 1 to 20 digits long. See NRF Size code documents
+                </xs:documentation></xs:annotation>
+                <xs:restriction base="Code_type">
+                    <xs:pattern value="\d+"></xs:pattern>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="TableName" type="Name_type"/>
+        <xs:attribute name="TableCode">
+            <xs:simpleType>
+                <xs:annotation><xs:documentation>
+                    Use zero "0" for in-house size codes. See NRF Size code
+                    documents for valid size table values.
+                </xs:documentation></xs:annotation>
+                <xs:restriction base="xs:string">
+                    <xs:length value="1"></xs:length>
+                    <xs:pattern value="\d"></xs:pattern>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="TableDesc" type="Description_type"/>
+    </xs:complexType>
+
+    <xs:complexType name="Style_type">
+        <xs:annotation><xs:documentation>
+            A list of names and descriptions in different locale to this style.
+            If attributes Name/Description are defined simultaneously with
+            LocalizedNameDescription, they will be ignored.
+            The TableName,TableDesc, TypeDesc and ProportionDesc are deprecated for 13.1.
+        </xs:documentation></xs:annotation>
+        <xs:sequence>
+            <xs:element name="LocalizedNameDescription" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" default="UPS"/>
+        <xs:attribute name="Code" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="4"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="Name" type="Name_type"/>
+        <xs:attribute name="Description" type="Description_type"/>
+    </xs:complexType>
+
+    <xs:complexType name="UOM_type">
+        <xs:sequence>
+            <xs:annotation><xs:documentation>
+                A list of names and descriptions in different locale to this uom.
+                If attributes Name/Description are defined simultaneously with
+                LocalizedNameDescription, they will be ignored.
+                The Names and Description attributes are deprecated for 13.1.
+            </xs:documentation></xs:annotation>
+            <xs:element name="LocalizedNameDescription" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" default="UPS"/>
+        <xs:attribute name="Code" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="2"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="TypeCode">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="2"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="System">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="Standard"/>
+                    <xs:enumeration value="Metric"/>
+                    <!-- xs:enumeration value="Imperial"/ -->
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="Name" type="Name_type"/>
+        <xs:attribute name="Description" type="Description_type"/>
+        <xs:attribute name="IsDefault" type="xs:boolean" default="false"/>
+        <xs:attribute name="DefaultEntryCode" type="xs:boolean" default="false"/>
+        <xs:attribute name="Enabled" type="xs:boolean" default="true"/>
+        <xs:attribute name="SortIndex" type="xs:int" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="Manufacturer_type">
+        <xs:sequence>
+            <xs:annotation><xs:documentation>
+                A list of localized names defined here. The Description attribute is not used.
+                The Names attribute is deprecated for 13.1.
+            </xs:documentation></xs:annotation>
+            <xs:element name="LocalizedName" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" default="UPS"/>
+        <xs:attribute name="ID" type="Code_type" use="required"/>
+        <xs:attribute name="Name" type="Name_type"/>
+    </xs:complexType>
+
+    <xs:complexType name="MerchandiseClassification_type">
+        <xs:sequence>
+            <xs:annotation><xs:documentation>
+                A list of localized descriptions defined here. The Name attribute is not used.
+                The Description attribute is deprecated for 13.1.
+            </xs:documentation></xs:annotation>
+            <xs:element name="LocalizedDescription" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" default="UPS"/>
+        <xs:attribute name="Code" type="Class_type" use="required"/>
+        <xs:attribute name="Description" type="Description_type"/>
+    </xs:complexType>
+
+    <xs:complexType name="Supplier_type">
+        <xs:sequence>
+            <xs:annotation><xs:documentation>
+                A list of localized names defined here. The Description attribute is not used.
+                The Name attribute is deprecated for 13.1.
+            </xs:documentation></xs:annotation>
+            <xs:element name="LocalizedName" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" default="UPS"/>
+        <xs:attribute name="ID" type="Code_type" use="required"/>
+        <xs:attribute name="DUNSNumber">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="9"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="Name" type="Name_type"/>
+        <xs:attribute name="IsManufacturer" type="xs:boolean" default="false"/>
+    </xs:complexType>
+
+    <xs:complexType name="UINLabel_type">
+        <xs:annotation><xs:documentation>
+            A list of Unique Identifier labels.
+        </xs:documentation></xs:annotation>
+        <xs:sequence>
+            <xs:annotation><xs:documentation>
+                A list of localized names defined here.  The Description attribute is not used.
+                The Name attribute is deprecated for 13.1.
+            </xs:documentation></xs:annotation>
+            <xs:element name="LocalizedName" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="Name" type="Name_type"/>
+    </xs:complexType>
+    
+    <xs:complexType name="Classification_type">
+        <xs:annotation><xs:documentation>
+            This type holds ClassificationID.This is used to get classification
+            associated to Item.We can get the itemImport in multiple
+            batches .
+            E.g first we may get import for creating base item.Then we may get
+            second import to attach classifications to the item. And
+            we may get third import to delete some classification and add some
+            more classifications. To handle these scenarios, we must have
+            ChangeType.                 
+        </xs:documentation></xs:annotation>
+        <xs:attribute name="ID" type="Class_type" use="required"></xs:attribute>
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" use="optional" default="UPS"/>
+    </xs:complexType>
+    
+    <xs:complexType name="RelatedItemAssociation_type">
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" default="UPS"/>
+        <xs:attribute name="RelatedItemID" type="ID_type" use="required"/>
+        <xs:attribute name="TypeCode" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="AUTO"/>
+                    <xs:enumeration value="UPSELL"/>
+                    <xs:enumeration value="CROSSSELL"/>
+                    <xs:enumeration value="SUBSTITUTE"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>                         
+        <xs:attribute name="ReturnAllowed" type="xs:boolean" default="true"/>
+        <xs:attribute name="RemoveAllowed" type="xs:boolean" default="true"/>
+    </xs:complexType>
+
+    <xs:complexType name="Item_type">
+        <xs:annotation><xs:documentation>
+            Upper level item information. This element requires a child element
+            to specify which store it belongs to. This element can be repeated
+            if this item should belong to multiple stores. The LocalizedNameDescription
+            elements may also be repeated with the intention that each
+            specifies a different language or country.
+        </xs:documentation></xs:annotation>
+        <xs:sequence>
+            <xs:annotation><xs:documentation>
+                This element holds localized ShortName and LongDescription.
+                The ShortName and LongDescription elements are deprecated for 13.1
+            </xs:documentation></xs:annotation>
+            <xs:element name="ShortName" type="LocalizedName_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="LongDescription" type="LocalizedDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="LocalizedNameDescription" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="MerchandiseHierarchy" type="MerchandiseHierarchy_type" minOccurs="0"/>
+            <xs:element name="RetailStoreItem" type="RetailStoreItem_type" maxOccurs="unbounded"/>
+            <xs:element name="DisplayMessage" type="ItemLevelMessages_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="UINLabel" type="UINLabel_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Classification" type="Classification_type" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="RelatedItemAssociation" type="RelatedItemAssociation_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" default="ADD"/>
+        <xs:attribute name="ID" type="ID_type" use="required"/>
+        <xs:attribute name="Type">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="Stock"/>
+                    <xs:enumeration value="Service"/>
+                    <xs:enumeration value="Coupon"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="POSDepartmentID" type="Class_type"/>
+        <xs:attribute name="ItemCost" type="Amount_type"/>
+        <xs:attribute name="KitSetCode" type="Code_type" default="0"/>
+        <xs:attribute name="UOMCode" type="Code_type"/>
+        <xs:attribute name="PackItemWeightCount" type="xs:decimal"/>
+        <xs:attribute name="Size">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="10"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="Color" type="Code_type"/>
+        <xs:attribute name="Style">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="4"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="TaxGroup" type="xs:int"/>
+        <xs:attribute name="Taxable" type="xs:boolean" default="true"/>
+        <xs:attribute name="Discountable" type="xs:boolean" default="true"/>
+        <xs:attribute name="DamageDiscountable" type="xs:boolean" default="true"/>
+        <xs:attribute name="RegistryEligible" type="xs:boolean"/>
+        <xs:attribute name="AuthorizedForSale" type="xs:boolean"/>
+        <xs:attribute name="RestockingFee" type="xs:boolean"/>
+        <xs:attribute name="WillCall" type="xs:boolean"/>
+        <xs:attribute name="SerializedItem" type="xs:boolean"/>
+        <xs:attribute name="UINType" type="xs:string"/>
+        <xs:attribute name="UINCaptureTime">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="20"/>
+                    <xs:enumeration value="Sale"/>
+                    <xs:enumeration value="StoreReceiving"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="ExternalSystemCreateUIN" type="xs:boolean" default="true"/>
+        <xs:attribute name="SizeRequired" type="xs:boolean"/>
+        <xs:attribute name="ActivationRequired" type="xs:boolean"/>
+        <xs:attribute name="ImageFileName" type="xs:string">
+            <xs:annotation><xs:documentation>
+                A file name specified here is expected to be a JPG or other
+                image file existing in the same bundle as the XML file. The
+                image will be imported as a blob into the database.
+            </xs:documentation></xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="ImageLocation" type="xs:string">
+            <xs:annotation><xs:documentation>
+                This locations should be a valid url for use by the application
+                in retrieving images.
+            </xs:documentation></xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="ItemLevelMessages_type">
+        <xs:annotation><xs:documentation>
+            Associates Item with a Preloaded Message.
+        </xs:documentation></xs:annotation>
+        <xs:sequence>
+            <xs:element name="ItemMsgAscn" type="Message_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Message_type">
+        <xs:annotation><xs:documentation>
+            Identifying a particular message and attach it to an item
+        </xs:documentation></xs:annotation>
+        <xs:attribute name="ID" type="xs:int" use="required"/>
+        <xs:attribute name="MessageType" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="Screen"/>
+                    <xs:enumeration value="Receipt"/>
+                    <xs:enumeration value="Rebate"/>
+                    <xs:enumeration value="Footer"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="TransactionType" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="Sale"/>
+                    <xs:enumeration value="Return"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="RetailStoreItem_type">
+        <xs:annotation><xs:documentation>
+            Item-location information. This element requires a child element to
+            specify a store id. This element can be repeated if this same info
+            should belong to multiple stores. The price element may be repeated
+            to support foreign currency by specifying differnt currency codes.
+
+            Even though RegularPrice can be defined with different currency code,
+            Currently only the price in base currency is supported. If a list of
+            REgularPrice elements used, the very last one will be picked up.
+        </xs:documentation></xs:annotation>
+        <xs:sequence>
+            <xs:element name="RetailStoreID" type="RetailStoreId_type" maxOccurs="unbounded"/>
+            <xs:element name="RegularPrice" type="RegularPrice_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="POSIdentity" type="POSIdentity_type" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" default="ADD"/>
+        <xs:attribute name="TaxGroup" type="xs:int" use="optional"/>
+        <xs:attribute name="VatCode" type="Code_type"/>
+        <xs:attribute name="AgeRestrictionId" type="xs:int"/>
+        <xs:attribute name="TemplateId" default="*DEFAULT">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="8"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="POSIdentity_type">
+        <xs:annotation><xs:documentation>
+            Multiple POSIdentity elements may be specified when different
+            UPCs apply to the same item.
+        </xs:documentation></xs:annotation>
+        <xs:attribute name="ChangeType" type="ChangeType_subtype" default="ADD"/>
+        <xs:attribute name="POSItemID" type="ID_type" use="required"/>
+        <xs:attribute name="UPC" type="ID_type"/>
+        <xs:attribute name="SupplierID" type="xs:string"/>
+        <xs:attribute name="ManufacturerID" type="xs:int"/>
+        <xs:attribute name="QuantityModifiable" default="Optional">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="Required"/>
+                    <xs:enumeration value="Prohibited"/>
+                    <xs:enumeration value="Optional"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name="Returnable" type="xs:boolean"/>
+        <xs:attribute name="PriceEntryRequired" type="xs:boolean" default="false"/>
+        <xs:attribute name="PriceModifiable" type="xs:boolean"/>
+        <xs:attribute name="AllowCouponMultiply" type="xs:boolean"/>
+        <xs:attribute name="ElectronicCoupon" type="xs:boolean"/>
+        <xs:attribute name="CouponRestricted" type="xs:boolean"/>
+        <xs:attribute name="SpecialOrderEligible" type="xs:boolean"/>
+        <xs:attribute name="EmployeeDiscountAllowed" type="xs:boolean" default="true"/>
+        <xs:attribute name="MinimumSaleUnitCount" type="xs:decimal" default="1.0"/>
+        <xs:attribute name="MaximumSaleUnitCount" type="xs:decimal" default="-1.0"/>
+    </xs:complexType>
+
+    <xs:complexType name="MerchandiseHierarchy_type">
+        <xs:annotation><xs:documentation>
+            This is the ID of the group in the MerchandiseHierarchy that this
+            item belongs to. Usually this is a class or subclass.
+        </xs:documentation></xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="StructureID" type="xs:string" default="-1">
+                    <xs:annotation><xs:documentation>
+                        Merchandise Structure ID.
+                    </xs:documentation></xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="Level" default="UNDF">
+                    <xs:annotation><xs:documentation>
+                        Merchandise Hierarchy Level Code.
+                    </xs:documentation></xs:annotation>
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:maxLength value="4"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="RegularPrice_type">
+        <xs:annotation><xs:documentation>
+            The regular price is the initial permanent price for a new item.
+            This price will effectively become amount of the first
+            PermanentPriceChange for this item. Do not attempt to change the
+            regular price afterwards through this element. Instead see
+            PermanentPriceChange in the PricingImport.xsd. Any effective
+            promotions or discounts will override, but not replace, the regular
+            price.
+        </xs:documentation></xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="CurrencyAmount_type">
+                <xs:attribute name="CompareAtPrice" type="Amount_type"/>
+                <xs:attribute name="IncludesTax" type="xs:boolean" default="false">
+                    <xs:annotation><xs:documentation>
+                        Attribute reserved for future use. To be implemented at
+                        a future date.
+                    </xs:documentation></xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:simpleType name="Class_type">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="10"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="Code_type">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="20"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ChangeType_subtype">
+        <xs:annotation><xs:documentation>
+            The change type is named slightly different from the one in
+            CommonImport.xsd to avoid a conflict. It allows for the "UPS" upsert
+            change type which will instruct the Data Import to update the
+            specified record then insert it if the update failed.
+
+            "UPS" (upsert) and ""DEL" (delete) are the only operations supported
+            for Preload data when using an Incremental fill type. If "DEL"" is
+            not specified as ChangeType, Then "UPS" is assumed.
+
+            It is recommended that the "ADD" and "UPD" change types are used for
+            "KillAndFill" fill type. "UPD" in this case would only affect
+            records previously inserted by "ADD" in the batch.
+        </xs:documentation></xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ADD"/>
+            <xs:enumeration value="UPD"/>
+            <xs:enumeration value="DEL"/>
+            <xs:enumeration value="UPS"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+
+</xs:schema>

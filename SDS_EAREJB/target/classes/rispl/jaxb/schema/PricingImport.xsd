@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/* ===========================================================================
+* Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * ===========================================================================
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED    (MM/DD/YY)
+ *    rabhawsa  07/04/13 - added effective date for the cancel items.
+ *    tksharma  06/13/13 - removed clearance attribute from pricechange event.
+ *                         it is not required
+ *    tksharma  05/16/13 - added enumeration value 'Single' to QualifierType
+ *    cgreene   02/05/13 - rename common.xsd to CommonImport.xsd
+ *    tksharma  12/26/12 - defaulted itempricecategory to both
+ *    tksharma  10/25/12 - Added ClearanceReset event type
+ *    tksharma  09/10/12 - Added start date to ItemAndPrice_type for
+ *                         overlapping promotions
+ *    tksharma  08/14/12 - CR 188 changes
+ *    tksharma  08/02/12 - multithreshold-merge with sthallam code
+ *    tksharma  08/02/12 - multithreshold- discount rule
+ *    sthallam  06/19/12 - Enhanced RPM Integration - Threshold Promotions
+ *    sthallam  05/30/12 - Enhanced RPM Integration - Clearance Pricing
+ *    tksharma  06/07/12 - code merge with clearance code for RPM Integration
+ *    tksharma  06/06/12 - Enhanced RPM Integration - New Discount Rules
+ *    abondala  01/04/10 - fix header
+ *    cgreene   12/18/09 - per Eatal reqs, default template to DEFAULT
+ *    masahu    03/17/09 - Pricing Group import moved to Customer imports
+ *    vikini    03/06/09 - Adding a choice between Name and LocalizedName for
+ *                         PricingGroup_type
+ *    glwang    02/13/09 - DIMP doc updates
+ *    npoola    02/04/09 - removed the Name attribute from added the
+ *                         localization for PricingGroup
+ *    npoola    02/04/09 - refreshed with the base line
+ *    npoola    02/04/09 - PricingGroup Dimp localization added
+ *    npoola    01/30/09 - Pricing Group Localization
+ *    lslepeti  01/29/09 - change co.id_ev_ext to int
+ *    cgreene   11/19/08 - migrate common types to ../CommonImport.xsd
+ *
+ * ===========================================================================
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xs:annotation><xs:documentation>
+		Pricing Import Schema. Copyright 2007 Oracle Inc. All rights reserved.
+
+		Use this schema in conjunction with a Oracle Store Systems Data Dictionary
+		and the relations between the element and attribute names should be
+		apparent.
+	</xs:documentation></xs:annotation>
+
+	<xs:include schemaLocation="../CommonImport.xsd"></xs:include>
+	<xs:element name="PricingImport">
+		<xs:annotation><xs:documentation>
+			Top-level element holding a collection of Price records.
+		</xs:documentation></xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="PriceChange" type="PriceChange_type" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="PricePromotion" type="PricePromotion_type" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="DiscountRule" type="DiscountRule_type" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="Clearance" type="ClearanceEvent_type" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="ClearanceReset" type="ClearanceResetEvent_type" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="FillType" type="FillType_type" use="required"/>
+			<xs:attribute name="CreationDate" type="xs:dateTime"/>
+			<xs:attribute name="ExpirationDate" type="xs:dateTime"/>
+			<xs:attribute name="Version" type="xs:string"/>
+			<xs:attribute name="Priority" type="xs:int"/>
+			<xs:attribute name="Batch" type="xs:int"/>
+		</xs:complexType>
+	</xs:element>
+	
+	<xs:complexType name="ClearanceEvent_type">
+		<xs:sequence>
+			<xs:group ref="DiscountTypeChoice" minOccurs="0" maxOccurs="1"/>
+			<xs:element name="Item" type="ItemAndPrice_type" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="ChangeType" type="ChangeType_type" default="ADD"/>	
+		<xs:attribute name="ID" type="xs:int" use="required"/>		
+		<xs:attribute name="StartDateTime" type="xs:dateTime" use="required"/>
+		<xs:attribute name="ResetDateTime" type="xs:dateTime" use="optional"/>
+	  <xs:attribute name="Priority" type="xs:int" default="0"/>
+		<xs:attribute name="TemplateType" default="*DEFAULT">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="8"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+	</xs:complexType>
+	
+	<xs:complexType name="ClearanceResetEvent_type">
+		<xs:sequence>			
+			<xs:element name="Item" type="ItemAndPrice_type" minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>		
+        <xs:attribute name="ChangeType" type="ChangeType_type" default="ADD"/>		
+		<xs:attribute name="ID" type="xs:int" use="required"/>		
+		<xs:attribute name="ResetDateTime" type="xs:dateTime" use="required"/>
+		<xs:attribute name="TemplateType" default="*DEFAULT">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="8"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="PriceChange_type">
+		<xs:sequence>
+		    <xs:choice>
+		      <xs:element name="Description" type="LocalizedDescription_type" minOccurs="0" maxOccurs="1"/>
+		      <xs:element name="LocalizedDescription" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+		    </xs:choice>
+			<xs:element name="Item" type="ItemAndPrice_type" minOccurs="1" maxOccurs="unbounded" />
+			<xs:element name="StoreID" type="RetailStoreId_type" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="ChangeType" type="ChangeType_type" default="ADD"/>
+		<xs:attribute name="ID" type="xs:int" use="required"/>
+		<xs:attribute name="StartDate" type="xs:date" use="required"/>
+		<xs:attribute name="TemplateType" default="*DEFAULT">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="8"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+	</xs:complexType>
+
+	<xs:complexType name="ItemAndPrice_type">
+		<xs:sequence>
+			<xs:element name="Price" type="CurrencyAmount_type" minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="ID" type="xs:string" use="required"/>
+		<xs:attribute name="StartDateTime" type="xs:dateTime" use="optional"/>
+		<xs:attribute name="TemplateType" default="*DEFAULT">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="8"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+	</xs:complexType>
+
+	<xs:group name="DiscountTypeChoice">
+		<xs:choice>
+			<xs:element name="DiscountPercent" type="xs:decimal"/>
+			<xs:element name="DiscountAmount" type="CurrencyAmount_type"/>
+			<xs:element name="NewPrice" type="CurrencyAmount_type"/>
+		</xs:choice>
+	</xs:group>
+
+	<xs:attributeGroup name="PromotionComponentAttributes">
+		<xs:attribute name="PromoCompID" type="xs:int" use="optional"/>
+		<xs:attribute name="PromoCompDetlID" type="xs:int" use="optional"/>
+	</xs:attributeGroup>
+
+	<xs:complexType name="PricePromotion_type">
+		<xs:sequence>
+		  <xs:choice>
+		      <xs:sequence>		        
+			     <xs:element name="Name" type="LocalizedName_type" minOccurs="0" maxOccurs="1">
+			     <xs:annotation>
+	              <xs:documentation>Name is mandatory element in all price promotion
+		            operations except the one which is sent to cancel item/ location
+	              </xs:documentation>
+                </xs:annotation>
+			     </xs:element>
+			     <xs:element name="Description" type="LocalizedDescription_type" minOccurs="0" maxOccurs="1"/>
+			 </xs:sequence>
+			 <xs:element name="LocalizedNameDescription" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+		  </xs:choice>
+			<xs:group ref="DiscountTypeChoice" minOccurs="0" maxOccurs="1"/>
+			<xs:choice>
+	            <xs:sequence>
+		            <xs:element name="Item" type="ItemAndPrice_type" minOccurs="0" maxOccurs="unbounded" />
+		            <xs:element name="StoreID" type="RetailStoreId_type" minOccurs="0" maxOccurs="unbounded" />
+	            </xs:sequence>
+	            <xs:element name="CancelItems" type="CancelItems_type" minOccurs="0" maxOccurs="unbounded" />
+            </xs:choice>
+		</xs:sequence>
+		<xs:attribute name="ChangeType" type="ChangeType_type" default="ADD"/>
+		<xs:attribute name="ItemPriceCategory" type="ItemPriceCategory_type" default="Regular"/>
+		<xs:attribute name="ID" type="xs:int" use="required"/>
+		<xs:attributeGroup ref="PromotionComponentAttributes"/>
+		<xs:attribute name="StartDateTime" type="xs:dateTime" use="required">
+		<xs:annotation>
+		  <xs:documentation>
+		    StartDateTime becomes an optional attribute when price promotion
+		             update is only for cancel item. Else, it is required.
+		  </xs:documentation>
+		</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="EndDateTime" type="xs:dateTime" use="optional">
+			<xs:annotation><xs:documentation>
+				If the EndDateTime is not specified, it will be assumed that it
+				was intentionally left blank to denote an never-ending
+				pricing rule. The value will then be persisted as
+				'2099-12-31 11:59:59.000'
+			</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="Type" type="PricePromotionType_type" use="required">
+		<xs:annotation>
+		  <xs:documentation>
+		    PricePromotionType_type is optional when update is sent for cancel item / location. Else, it is required.
+		  </xs:documentation>
+		</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="Priority" type="xs:int" default="0"/>
+		<xs:attribute name="TemplateType" default="*DEFAULT">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:maxLength value="8"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+		<xs:attribute name="PricingGroupID" type="xs:int"/>
+	</xs:complexType>
+
+	<xs:simpleType name="PricePromotionType_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="AmountOff"/>
+			<xs:enumeration value="PercentOff"/>
+			<xs:enumeration value="NewPrice"/>
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="ItemPriceCategory_type">
+	<xs:annotation>
+	<xs:documentation>
+		This type is added since 14.0 for Clearance Price. Promotion or Discount rule
+		 can be applied to Regular items or Clearance items or Both.
+	</xs:documentation>
+	</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Regular"/>
+			<xs:enumeration value="Clearance"/>
+			<xs:enumeration value="Both"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="DiscountRule_type">
+		<xs:sequence>
+			<xs:element name="PricingRule" type="PricingRule_type" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="Sources" type="Sources_type" minOccurs="0" maxOccurs="1">
+			<xs:annotation>
+	              <xs:documentation>Sources is mandatory element in all pricing rules
+		            operations except the one which is sent to cancel item/ location
+	              </xs:documentation>
+            </xs:annotation>
+			</xs:element>
+			<xs:element name="Targets" type="Targets_type" minOccurs="0" maxOccurs="1">
+			<xs:annotation>
+	              <xs:documentation>Targets is mandatory element in all pricing rules
+		            operations except the one which is sent to cancel item/ location and the one which is a multi threshold rule.
+	              </xs:documentation>
+            </xs:annotation>
+			</xs:element>
+			<xs:element name="CancelItems" type="CancelItems_type" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="PricingRule_type">
+		<xs:sequence>
+		    <xs:choice>
+			     <xs:element name="Name" type="LocalizedName_type" minOccurs="0" maxOccurs="1">
+			     <xs:annotation>
+	              <xs:documentation>Name is mandatory element in all pricing rules
+		            operations except the one which is sent to cancel item/ location
+	              </xs:documentation>
+                </xs:annotation>
+			     </xs:element>
+			     <xs:element name="LocalizedName" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:choice>
+			<xs:element name="SourceThreshold" type="CurrencyAmount_type" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="SourceLimit" type="CurrencyAmount_type" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="TargetThreshold" type="CurrencyAmount_type" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="TargetLimit" type="CurrencyAmount_type" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="StoreID" type="RetailStoreId_type" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="ChangeType" type="ChangeType_type" default="ADD"/>
+		<xs:attribute name="SourceItemPriceCategory" type="ItemPriceCategory_type" default="Both"/>
+		<xs:attribute name="TargetItemPriceCategory" type="ItemPriceCategory_type" default="Both"/>
+		<xs:attribute name="ID" type="xs:int" use="required"/>
+		<xs:attributeGroup ref="PromotionComponentAttributes"/>
+		<xs:attribute name="StartDateTime" type="xs:dateTime" use="required">
+		<xs:annotation>
+		  <xs:documentation>
+		    StartDateTime becomes an optional attribute when pricing rule
+		             update is only for cancel item. Else, it is required.
+		  </xs:documentation>
+		</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="EndDateTime" type="xs:dateTime" use="optional">
+			<xs:annotation><xs:documentation>
+				If the EndDateTime is not specified, it will be assumed that it
+				was intentionally left blank to denote an never-ending
+				pricing rule. The value will then be persisted as
+				'2099-12-31 11:59:59.000'
+			</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="Type" type="RuleType_type" use="required">
+		<xs:annotation>
+		  <xs:documentation>
+		    RuleType_type becomes an optional attribute when pricing rule
+		             update is only for cancel item. Else, it is required.
+		  </xs:documentation>
+		</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="NbrTimesPerTrans" type="xs:int" default="-1"/>
+		<xs:attribute name="AccountingMethod" type="AccountingMethodType_type" default="Discount" />
+		<xs:attribute name="AllowSourceToRepeat" type="xs:boolean" default="true"/>
+		<xs:attribute name="DealDistribution" type="DealDistributionType_type" default="Target"/>
+		<xs:attribute name="Scope" type="ScopeType_type" default="Item" />
+		<xs:attribute name="PricingGroupID" type="xs:int"/>
+	</xs:complexType>
+
+	<xs:attributeGroup name="SourceTargetAttributes">
+		<xs:attribute name="Type" type="SourceTargetType_type" default="Item" />
+		<xs:attribute name="Qualifier" type="QualifierType_type" default="Any">
+			<xs:annotation><xs:documentation>
+				If not specified, it is assumed that the Qualifier is Any.
+			</xs:documentation></xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="Qty" type="xs:int" default="1">
+			<xs:annotation><xs:documentation>
+				It is only necessary to specify Qty if Qualifier has been
+				set to Any. If not specified, it is assumed that Qty for
+				Any is one (1).
+			</xs:documentation></xs:annotation>
+		</xs:attribute>
+	</xs:attributeGroup>
+
+	<xs:complexType name="Sources_type">
+		<xs:sequence>
+			<xs:element name="Source" minOccurs="1" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="SourceAmount" type="CurrencyAmount_type" minOccurs="0" maxOccurs="unbounded" />
+						
+					</xs:sequence>
+					<xs:attribute name="ID" type="xs:string" use="required" />
+					<xs:attribute name="Qty" type="xs:int" />
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="Thresholds" type="Thresholds_type" minOccurs="0" maxOccurs="1"></xs:element>
+		</xs:sequence>
+		<xs:attributeGroup ref="SourceTargetAttributes"/>
+	</xs:complexType>
+
+	<xs:complexType name="Targets_type">
+		<xs:sequence>
+			<xs:group ref="DiscountTypeChoice" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="Target" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:attribute name="ID" type="xs:string" use="required"/>
+					<xs:attribute name="Qty" type="xs:int" default="1"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attributeGroup ref="SourceTargetAttributes"/>
+	</xs:complexType>
+	
+	<xs:complexType name="Thresholds_type">
+	<xs:sequence>
+		<xs:element name="Threshold" type="Threshold_type"
+			minOccurs="1" maxOccurs="unbounded"></xs:element>
+	</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Threshold_type">
+		<xs:group ref="DiscountTypeChoice" minOccurs="1" maxOccurs="1" />
+		<xs:attribute name="ID" type="xs:string" use="required" />
+		<xs:attribute name="Threshold" type="xs:int" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="CancelItems_type">
+        <xs:sequence>
+            <xs:element name="CancelItem"  type="CancelItem_type" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="EffectiveDateTime" type="xs:dateTime" use="required"/>
+    </xs:complexType>
+	
+	<xs:complexType name="CancelItem_type">
+        <xs:attribute name="ID"  type="xs:string" use="required"/>
+    </xs:complexType>
+
+	<xs:simpleType name="RuleType_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="BuyNofXgetYatZ%off"/>
+			<xs:enumeration value="BuyNofXgetYatZ$off"/>
+			<xs:enumeration value="BuyNofXgetYatZ$"/>
+			<xs:enumeration value="BuyNofXgetHighestPricedXatZ%off"/>
+			<xs:enumeration value="BuyNofXgetLowestPricedXatZ%off"/>
+			<xs:enumeration value="Buy$NorMoreOfXgetYatZ$off"/>
+			<xs:enumeration value="Buy$NorMoreOfXgetYatZ%off"/>
+			<xs:enumeration value="Buy$NorMoreOfXgetYatZ$"/>
+			<xs:enumeration value="BuyNofXforZ$"/>
+			<xs:enumeration value="BuyNofXforZ%off"/>
+			<xs:enumeration value="BuyNofXforZ$off"/>
+			<xs:enumeration value="BuyNorMoreOfXforZ%off"/>
+			<xs:enumeration value="BuyNorMoreOfXforZ$Each"/>
+			<xs:enumeration value="Buy$NofXforZ$off"/>
+			<xs:enumeration value="Buy$NofXforZ%off"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="AccountingMethodType_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Discount"/>
+			<xs:enumeration value="Markdown"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="DealDistributionType_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Target"/>
+			<xs:enumeration value="SourceTarget"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ScopeType_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Item"/>
+			<xs:enumeration value="Group"/>
+			<xs:enumeration value="Transaction"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="SourceTargetType_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Item"/>
+			<xs:enumeration value="Coupon"/>
+			<xs:enumeration value="Class"/>
+			<xs:enumeration value="Department"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="QualifierType_type">
+		<xs:annotation><xs:documentation>
+			Used to qualify a list whereby Any element in the list must be
+			used versus requiring All elements in the list.
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Any"></xs:enumeration>
+			<xs:enumeration value="All"></xs:enumeration>			
+			<xs:enumeration value="AnyCombo"></xs:enumeration>
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

@@ -1,0 +1,1759 @@
+ package rispl.ds.invoice;
+
+import com.retailsols.sds.invoice.cancel.CancelCustomerInvoiceIfc;
+import com.test.entities.OrderDetailsWithInvoice;
+import java.awt.Image;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.StringBufferInputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+import javax.swing.ImageIcon;
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.dispatcher.SessionMap;
+import rispl.db.model.claim.ClaimTranDscItm;
+import rispl.db.model.claim.ClaimTranDscItmPK;
+import rispl.db.model.claim.ClaimTranHeader;
+import rispl.db.model.claim.ClaimTranLineItem;
+import rispl.db.model.claim.ClaimTranSum;
+import rispl.dk.Employee.EmpMerchAssociationIfc;
+import rispl.dk.Employee.EmployeeIfc;
+import rispl.dk.customer.CustomerIfc;
+import rispl.dkart.order.lookup.dao.DelvOrderSearchVO;
+import rispl.dkart.order.lookup.dao.OrderDAOBeanRemote;
+import rispl.dkart.services.detail.claim.ClaimDetailTable;
+import rispl.dkart.services.ejb.LookUpCustomerIfc;
+import rispl.dkart.services.ejb.LookUpEmployeeIfc;
+import rispl.dkart.services.ejb.claim.ClaimRemote;
+import rispl.dkart.services.ejb.transaction.OrderTransactionsIfc;
+import rispl.dkart.services.entities.customer.CustomerSite;
+import rispl.dkart.services.entities.customer.CustomerSiteAddress;
+import rispl.dkart.services.entities.customer.CustomerSiteInvoice;
+import rispl.dkart.services.entities.transaction.DkartReasonCodes;
+import rispl.dkart.services.entities.transaction.ExciseTaxItem;
+import rispl.dkart.services.entities.transaction.OrdInvShpQtySrlno;
+import rispl.dkart.services.entities.transaction.OrderTranDiscountItem;
+import rispl.dkart.services.entities.transaction.OrderTranHeader;
+import rispl.dkart.services.entities.transaction.OrderTranHeaderPK;
+import rispl.dkart.services.entities.transaction.OrderTranLineItem;
+import rispl.dkart.services.entities.transaction.lpo.OrderTransactionLpo;
+import rispl.dkservices.common.CustomerSearchCriteria;
+import rispl.dkservices.common.OrderTransactionSearchCriteria;
+import rispl.dkservices.common.OrderTransactionSearchCriteriaIfc;
+import rispl.ds.DSAction;
+import rispl.ds.DSAction.SESSION;
+import rispl.ds.context.DKartContext;
+import utility.ConfigUtils;
+
+public class Invoice extends DSAction {
+   static Logger LOGGER = LogManager.getLogger(Invoice.class);
+   private static final long serialVersionUID = 1L;
+   private String shipping = "";
+   private String billing = "";
+   private boolean download;
+   private String age = "";
+   private Date orderDateInfo;
+   private List<String[]> LINEITEMS = new ArrayList();
+   private SessionMap<String, Object> sessionmap;
+   private EmployeeIfc employee;
+   private String orderID;
+   private String invoiceID;
+   private String customerInfo;
+   private String itemInfo;
+   private Map<String, String> getAllDiscountReasnCode = new HashMap();
+   private Map<String, String> getExciseTaxItem = new HashMap();
+   private List<String> ExcisTaxItemList = new ArrayList();
+   private OrderTranHeader[] orders;
+   private List<CustomerSiteInvoice> invoices;
+   private String[] customerName;
+   private InputStream inputStream;
+   private File invoicePdf = null;
+   private String tempFolder = System.getProperty("java.io.tmpdir");
+   private String datepicker2;
+   private String datepicker1;
+   private String datepicker3;
+   private String datepicker4;
+   private String OrderTotalFrom;
+   private String OrderTotalTo;
+   private String InvoiceTotalFrom;
+   private String InvoiceTotalTo;
+   private String invoiceStatus;
+   private String activeTab;
+   private boolean overDueInvoices;
+   private boolean EnblRcrdPaymnt;
+   private Date currentDate;
+   private String invDueDate;
+   private String fileName;
+   private CustomerIfc[] customers;
+   private String searchRange;
+   private String openInvoiceSearchRange;
+   public ClaimDetailTable[] rejectClaim_List;
+   ClaimDetailTable[] newRejectClaimList = null;
+   private List<CustomerSiteInvoice> custinvList = null;
+   private String invType;
+   List<CustomerSiteInvoice> newCustinvList = new ArrayList();
+   List<CustomerSiteInvoice> newCustSiteinvList = new ArrayList();
+   List<String> newCustNames = new ArrayList();
+   List<BigInteger> paymntTrmsList = new ArrayList();
+   private String InvItemId = null;
+   private CustomerSiteInvoice custSiteinv;
+   private OrderTranHeader orderDetail;
+   private SessionMap<String, Object> sessionMap;
+   private CustomerSiteInvoice invDetail;
+   private String[] salesAgents;
+   private BigDecimal AmtToPay;
+   private byte[] order_Lpocntnt;
+   private ImageIcon imgIcn;
+   private static String lpoImg;
+   private String contentType;
+   private String filename;
+   private String contentDisposition;
+   private String salesAgntNme;
+   private static OrderTranHeader[] ordersLpo;
+   private String invoiceId;
+   private String orderId;
+   private Date orderDate;
+   private String custId;
+   private String custName;
+   private String invAmt;
+   private String invStatus;
+   private String mimeType;
+   private List<OrdInvShpQtySrlno> serialNoList;
+   private OrdInvShpQtySrlno serialNo;
+   private boolean enableRecordPaymentButton;
+   private DelvOrderSearchVO delvORderSearchVO;
+   private BigDecimal deliveredQuantity;
+   private boolean showDeliveredQuantity = true;
+   private Map<String, StringBuffer> slnoMap = null;
+
+   public Date getOrderDateInfo() {
+      return this.orderDateInfo;
+   }
+
+   public void setOrderDateInfo(Date orderDateInfo) {
+      this.orderDateInfo = orderDateInfo;
+   }
+
+   public String getInvDueDate() {
+      return this.invDueDate;
+   }
+
+   public void setInvDueDate(String invDueDate) {
+      this.invDueDate = invDueDate;
+   }
+
+   public void setRejecClaimList(ClaimDetailTable[] newAcceptClaimList) {
+      this.rejectClaim_List = newAcceptClaimList;
+   }
+
+   public ClaimDetailTable[] getRejecClaimList() {
+      return this.rejectClaim_List;
+   }
+
+   public EmployeeIfc getEmployee() {
+      return this.employee;
+   }
+
+   public void setEmployee(EmployeeIfc employee) {
+      this.employee = employee;
+   }
+
+   public Map<String, String> getGetAllDiscountReasnCode() {
+      return this.getAllDiscountReasnCode;
+   }
+
+   public void setGetAllDiscountReasnCode(Map<String, String> getAllDiscountReasnCode) {
+      this.getAllDiscountReasnCode = getAllDiscountReasnCode;
+   }
+
+   private List<Integer> getEmpMrchAssc(EmployeeIfc employee2) {
+      List<EmpMerchAssociationIfc> empMrchAss = this.employee.getMerchAssoc();
+      List<Integer> divIds = new ArrayList();
+      if (empMrchAss != null) {
+         Iterator var5 = empMrchAss.iterator();
+
+         while(var5.hasNext()) {
+            EmpMerchAssociationIfc empMrchAsc = (EmpMerchAssociationIfc)var5.next();
+            if (empMrchAsc.getMerchId().startsWith("1:")) {
+               int merchId = Integer.parseInt(empMrchAsc.getMerchId().split("1:")[1]);
+               divIds.add(merchId);
+            }
+         }
+      }
+
+      return divIds;
+   }
+
+   public String getInvStatus() {
+      return this.invStatus;
+   }
+
+   public void setInvStatus(String invStatus) {
+      this.invStatus = invStatus;
+   }
+
+   public String getOrderId() {
+      return this.orderId;
+   }
+
+   public Date getOrderDate() {
+      return this.orderDate;
+   }
+
+   public void setOrderDate(Date orderDate) {
+      this.orderDate = orderDate;
+   }
+
+   public String getCustId() {
+      return this.custId;
+   }
+
+   public void setCustId(String custId) {
+      this.custId = custId;
+   }
+
+   public String getCustName() {
+      return this.custName;
+   }
+
+   public void setCustName(String custName) {
+      this.custName = custName;
+   }
+
+   public String getInvAmt() {
+      return this.invAmt;
+   }
+
+   public void setInvAmt(String invAmt) {
+      this.invAmt = invAmt;
+   }
+
+   public void setOrderId(String orderId) {
+      this.orderId = orderId;
+   }
+
+   public Map<String, String> getGetExciseTaxItem() {
+      return this.getExciseTaxItem;
+   }
+
+   public void setGetExciseTaxItem(Map<String, String> getExciseTaxItem) {
+      this.getExciseTaxItem = getExciseTaxItem;
+   }
+
+   public List<String> getExcisTaxItemList() {
+      return this.ExcisTaxItemList;
+   }
+
+   public void setExcisTaxItemList(List<String> excisTaxItemList) {
+      this.ExcisTaxItemList = excisTaxItemList;
+   }
+
+   public String execute() throws Exception {
+      OrderTransactionsIfc trans = DKartContext.getLookupOrder();
+      this.employee = super.getEmployee();
+      this.orders = (OrderTranHeader[])this.getFromSession(SESSION.INVOICE_ORDER_TRAN);
+      this.invDetail = (CustomerSiteInvoice)this.getFromSession(SESSION.INVOICE_DETAIL);
+      this.salesAgntNme = (String)this.getFromSession(SESSION.SALESAGENT_NAME);
+
+      try {
+         if (this.orders != null || this.orders.length >= 0) {
+            this.slnoMap = trans.getItemSerialNumbers(this.orders[0]);
+         }
+      } catch (Exception var3) {
+         var3.printStackTrace();
+      }
+
+      this.putInSession(SESSION.INVOICE_ORDER_TRAN, (Object)null);
+      this.putInSession(SESSION.INVOICE_DETAIL, (Object)null);
+      return "success";
+   }
+
+   public String invSearchByOrder() {
+      this.employee = super.getEmployee();
+      String emplID = this.employee.getEmployeeId();
+      String empRoleAcc = this.employee.getRoleAccess();
+      List divIds = this.getEmpMrchAssc(this.employee);
+
+      try {
+         HttpServletRequest request = ServletActionContext.getRequest();
+         String url = request.getHeader("referer");
+         OrderTransactionsIfc trans = DKartContext.getLookupOrder();
+         OrderTransactionSearchCriteriaIfc search = new OrderTransactionSearchCriteria();
+         if (url != null) {
+            if (url.contains("delvInvoiceSearchByOrder")) {
+               search.setFromDeliverySearch(true);
+            } else if (url.contains("delvOrderSearchbyCustomer")) {
+               search.setFromDeliverySearch(true);
+            }
+         }
+
+         search.setMaximumResults(99);
+         if (this.invoiceStatus.equalsIgnoreCase("OverDue")) {
+            this.overDueInvoices = true;
+            search.setTypeOfInvoice(1);
+         } else {
+            this.overDueInvoices = false;
+            search.setTypeOfInvoice(Integer.parseInt(this.invoiceStatus));
+         }
+
+         if (this.activeTab.equalsIgnoreCase("tab_1")) {
+            search.setSearchByinvoiceNumberOrOrderNumber(false);
+            search.setInvoiceNumberOrOrderNumber(this.orderID.trim());
+            search.setOrderDateRangeFrom(this.datepicker1);
+            search.setOrderDateRangeTo(this.datepicker2);
+            search.setOrderTotalFrom(this.OrderTotalFrom);
+            search.setOrderTotalTo(this.OrderTotalTo);
+            search.setSearchByCustomerInfo(false);
+         } else if (this.activeTab.equalsIgnoreCase("tab_2")) {
+            search.setSearchByinvoiceNumberOrOrderNumber(true);
+            search.setInvoiceNumberOrOrderNumber(this.invoiceID.trim());
+            search.setInvoiceDateRangeFrom(this.datepicker3);
+            search.setInvoiceDateRangeTo(this.datepicker4);
+            search.setInvoiceTotalFrom(this.InvoiceTotalFrom);
+            search.setInvoiceTotalTo(this.InvoiceTotalTo);
+            search.setSearchByInvoiceTotal(true);
+         } else {
+            search.setSearchByCustomerInfo(true);
+            CustomerSearchCriteria customerSearchCriteria = null;
+            customerSearchCriteria = this.getLookupCriteria();
+            search.setCustomerInfo(customerSearchCriteria);
+            this.InvItemId = this.InvItemId.trim();
+            search.setItemIdOrDescription(this.InvItemId);
+         }
+
+         this.orders = trans.getCustomerSiteAllInvoices(search, emplID, empRoleAcc, divIds);
+         if (this.overDueInvoices && this.orders != null) {
+            this.orders = this.getOverDueInvoices(this.orders);
+         }
+
+         if (this.orders != null) {
+            this.setSalesAgents(this.getSalesAgents(this.orders));
+         } else {
+            this.orders = this.orders == null ? new OrderTranHeader[0] : this.orders;
+            this.addActionError("No invoices found");
+         }
+
+         this.setOrders(this.orders);
+         if (this.orders != null && this.orders.length > 0) {
+            this.customerName = new String[this.orders.length];
+
+            for(int i = 0; i < this.orders.length; ++i) {
+               if (this.orders[i].getCustomer().getSiteInvoices() != null && this.orders[i].getCustomer().getSiteInvoices().size() > 0) {
+                  if (this.getInvoices() != null) {
+                     this.getInvoices().addAll(this.orders[i].getCustomer().getSiteInvoices());
+                  } else {
+                     this.setInvoices(this.orders[i].getCustomer().getSiteInvoices());
+                  }
+
+                  this.customerName[i] = this.orders[i].getCustomer().getCustomerHeader().getCtNm();
+               }
+            }
+         } else {
+            int count = 0;
+            this.newRejectClaimList = new ClaimDetailTable[count];
+            this.setRejecClaimList(this.newRejectClaimList);
+            this.addActionError("No invoices were found with this information.");
+         }
+      } catch (Exception var10) {
+         this.addActionError(var10.toString());
+      }
+
+      try {
+         if (this.customerName != null && this.customerName.length > 0) {
+            this.setEnblRcrdPaymnt(this.getrecrdpymt(this.customerName, this.orders));
+         }
+
+         LOG.info("fetching the default Search Range of Invoices");
+         this.setSearchRange(DKartContext.getParamterBean().fetchXMLParameterValues().getInvoiceSearchRange());
+         this.setOpenInvoiceSearchRange(DKartContext.getParamterBean().fetchXMLParameterValues().getOpenInvoiceRange());
+         LOG.info("Default Search Range Fetched is :  " + DKartContext.getParamterBean().fetchXMLParameterValues().getInvoiceSearchRange());
+      } catch (Exception var9) {
+         LOGGER.error("Error while fetching parameter");
+      }
+
+      this.putInSession(SESSION.INVOICE_ORDER_TRAN, this.orders);
+      return "success";
+   }
+
+   public String InvoiceDetailSearch() {
+      this.employee = super.getEmployee();
+      System.out.println("getInvoice().invoiceID : " + this.invoiceID);
+
+      try {
+         OrderTransactionsIfc trans = DKartContext.getLookupOrder();
+         OrderTransactionSearchCriteriaIfc search = new OrderTransactionSearchCriteria();
+         search.setSearchByinvoiceNumberOrOrderNumber(true);
+         search.setInvoiceNumberOrOrderNumber(this.invoiceID);
+         this.orders = trans.getTransactionsInvoices(search);
+         ordersLpo = this.orders;
+         lpoImg = null;
+         if (this.orders[0].getOrdTranLpo() != null) {
+            lpoImg = "printLPO";
+         }
+
+         this.shipping = this.orders[0].getCtDvrInf();
+         this.getBillingAdrs(((CustomerSiteInvoice)this.orders[0].getCustomer().getSiteInvoices().get(0)).getCustomerSite().getCustomerSiteAddressList());
+         List<CustomerSiteInvoice> tempInvs = this.orders[0].getCustomer().getSiteInvoices();
+         ListIterator invItr = tempInvs.listIterator();
+
+         while(invItr.hasNext()) {
+            CustomerSiteInvoice tempInv1 = (CustomerSiteInvoice)invItr.next();
+            if (tempInv1.getArInvNum().equalsIgnoreCase(this.invoiceID)) {
+               this.invDetail = tempInv1;
+               this.setAge(this.calculateInvoiceAge(this.invDetail.getArInvDate(), this.invDetail.getInvStatus()));
+               break;
+            }
+         }
+
+         String orderNum = this.invDetail.getOrderNum();
+         List<OrderDetailsWithInvoice> orderInfoList = trans.getOrderDateForOrderId(orderNum);
+
+         OrderDetailsWithInvoice orderInfo;
+         for(Iterator var8 = orderInfoList.iterator(); var8.hasNext(); this.orderDateInfo = orderInfo.getOrderDate()) {
+            orderInfo = (OrderDetailsWithInvoice)var8.next();
+         }
+
+         List<ExciseTaxItem> getExciseTaxList = trans.getExciseTax();
+         Iterator var9 = getExciseTaxList.iterator();
+
+         String resnCodeDes;
+         while(var9.hasNext()) {
+            ExciseTaxItem getExtax = (ExciseTaxItem)var9.next();
+            String item = getExtax.getItemId();
+            resnCodeDes = getExtax.getExcise();
+            this.getExciseTaxItem.put(item, resnCodeDes);
+         }
+
+         this.ExcisTaxItemList = new ArrayList(this.getExciseTaxItem.keySet());
+         List<DkartReasonCodes> getDisResnCodesList = trans.getAllDisRsnCode();
+         Iterator var33 = getDisResnCodesList.iterator();
+
+         while(var33.hasNext()) {
+            DkartReasonCodes getDisResnCodes = (DkartReasonCodes)var33.next();
+            resnCodeDes = getDisResnCodes.getRsnDesc();
+            long longrsncode = getDisResnCodes.getRsnCode();
+            String resnCode = Long.toString(longrsncode);
+            this.getAllDiscountReasnCode.put(resnCode, resnCodeDes);
+         }
+
+         String EmID;
+         if (this.orders[0].getScOrd().compareTo(new BigDecimal(5)) != 0 && this.orders[0].getScOrd().compareTo(new BigDecimal(7)) != 0) {
+            this.setShowDeliveredQuantity(false);
+         } else {
+            EmID = this.orders[0].getOrdTranSum().getIdOrd();
+            Map<String, Long> quantityMap = new HashMap();
+            OrderTransactionsIfc tran = DKartContext.getLookupOrder();
+            List<OrderTranLineItem> shipOrders = tran.getDeliveredQty(EmID);
+            Iterator var41 = shipOrders.iterator();
+
+            while(var41.hasNext()) {
+               OrderTranLineItem line = (OrderTranLineItem)var41.next();
+               quantityMap.get(line.getLineQnt());
+            }
+         }
+
+         EmID = this.orders[0].getEmId();
+         String[] salesAgent = new String[]{EmID};
+         LookUpEmployeeIfc lookUpEmp = DKartContext.getLookupEmployee();
+         String salesAgntNme = (String)lookUpEmp.getSalesAgentsList(salesAgent).get(0);
+         String PAYMNT_TRMS = String.valueOf(this.orders[0].getCustomer().getPaymentTerms().getPayIn());
+         int payT = Integer.parseInt(PAYMNT_TRMS);
+         String invDate = String.valueOf(this.invDetail.getArInvDate());
+         DateFormat formatter = new SimpleDateFormat("E MMM dd HH:mm:ss Z yyyy");
+         Date date = formatter.parse(invDate);
+         Calendar cal = Calendar.getInstance();
+         cal.setTime(date);
+         String formatedDate = cal.get(5) + "/" + (cal.get(2) + 1) + "/" + cal.get(1);
+         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+         Calendar c = Calendar.getInstance();
+         c.setTime(sdf.parse(formatedDate));
+         c.add(5, payT - 1);
+         SimpleDateFormat sdf1 = new SimpleDateFormat("dd-MMM-yyyy");
+         this.invDueDate = sdf1.format(c.getTime());
+         this.setInvDueDate(this.invDueDate);
+         this.putInSession(SESSION.SALESAGENT_NAME, salesAgntNme);
+         this.putInSession(SESSION.INVOICE_ORDER_TRAN, this.orders);
+         this.putInSession(SESSION.INVOICE_DETAIL, this.invDetail);
+         if (this.orders != null && this.orders.length > 0) {
+            this.invType = "1";
+            this.customerInfo = this.orders[0].getCustomer().getCustomerHeader().getCustomerHeaderPK().getCustId();
+            this.InvoiceSearchbyCustomer();
+            new HashMap();
+            String term = "";
+            this.setSalesAgents(this.getSalesAgentsItemLevel(this.orders[0]));
+            String recordPaymentButton = DKartContext.getParamterBean().fetchXMLParameterValues().getEnableRecordPaymentButton();
+            if (recordPaymentButton != null && recordPaymentButton.equalsIgnoreCase("yes")) {
+               this.setEnableRecordPaymentButton(true);
+            }
+         }
+      } catch (Exception var26) {
+         this.addActionError(var26.getMessage());
+      }
+
+      return "success";
+   }
+
+   public String printInvoice() {
+      String ret = this.InvoiceDetailSearch();
+      ArrayList ordlis = new ArrayList();
+
+      try {
+         String v1 = this.invDetail.getOrderNum();
+         String v2 = String.valueOf(this.orders[0].getId().getTrnSeq());
+         String v3 = this.orders[0].getId().getRtStrId();
+         String v4 = this.orders[0].getId().getOrdWs();
+         String v5 = this.orders[0].getId().getDcDyOrd();
+         String v6 = "@";
+         String res = v1 + v6 + v2 + v6 + v3 + v6 + v4 + v6 + v5;
+         ordlis.add(res);
+         OrderTransactionsIfc order = DKartContext.getLookupOrder();
+         order.markOrderAsDelivered(ordlis);
+      } catch (Exception var11) {
+         var11.printStackTrace();
+      }
+
+      return ret;
+   }
+
+   private String calculateInvoiceAge(Date arInvDate, char status) {
+      String age = "";
+      if (arInvDate != null && status == '1') {
+         Date todayDate = new Date();
+         int intAge = (int)((todayDate.getTime() - arInvDate.getTime()) / 86400000L);
+         age = String.valueOf(intAge) + " days";
+      }
+
+      return age;
+   }
+
+   public String delOrderSearchbyCustomer() throws Exception {
+      try {
+         CustomerSearchCriteria customerSearchCriteria = null;
+         List<OrderTranHeaderPK> pkList = null;
+         if (this.customerInfo != null) {
+            customerSearchCriteria = this.getLookupCriteria();
+         }
+
+         if (this.InvItemId != null && this.InvItemId.length() > 0) {
+            System.out.println(this.getInvItemId());
+            OrderTransactionsIfc trans = DKartContext.getLookupOrder();
+            pkList = trans.getTranHeadPkForDelivered();
+            ArrayList<OrderTranHeader[]> invordList = trans.getDelOrderIdByItemId(this.InvItemId);
+            OrderTranHeader[] orders = new OrderTranHeader[invordList.size()];
+
+            int i;
+            for(i = 0; i < invordList.size(); ++i) {
+               OrderTranHeader[] temp = (OrderTranHeader[])invordList.get(i);
+               if (this.customerInfo != null) {
+                  if (customerSearchCriteria.getCustomerId() != null) {
+                     if (temp[0].getCustomer().getCustomerHeader().getCustomerHeaderPK().getCustId().equalsIgnoreCase(this.customerInfo)) {
+                        orders[i] = temp[0];
+                     }
+                  } else if (customerSearchCriteria.getFirstName() != null && temp[0].getCustomer().getCustomerHeader().getCtNm().toLowerCase().contains(this.customerInfo)) {
+                     orders[i] = temp[0];
+                  }
+               } else {
+                  orders[i] = temp[0];
+               }
+            }
+
+            
+            i1 = 0;
+
+            for(int i1 = 0; i1 < orders.length; ++i1) {
+               if (orders[i1] != null) {
+                  ++i1;
+               }
+            }
+
+            OrderTranHeader[] orders1 = new OrderTranHeader[i];
+            int notNull = 0;
+
+            for(int k = 0; k < orders.length; ++k) {
+               if (orders[k] != null) {
+                  orders1[notNull] = orders[k];
+                  ++notNull;
+               }
+            }
+
+            orders1 = this.doProcessHeaderforItem(pkList, orders1);
+            if (orders1 != null && orders1.length > 0) {
+               this.setSalesAgents(this.getSalesAgents(orders1));
+            } else {
+               this.addActionError("No orders found");
+            }
+
+            this.setOrders(orders1);
+         } else {
+            LookUpCustomerIfc lookUpCustomer = DKartContext.getLookUpCustomer();
+            this.customers = lookUpCustomer.lookUpCust(customerSearchCriteria);
+            Set<OrderTranHeader> temporders = new HashSet();
+            if (this.customers != null && this.customers.length > 0) {
+               int custlngth = 0;
+
+               String[] searchCustIds;
+               for(searchCustIds = new String[this.customers.length]; custlngth <= this.customers.length - 1; ++custlngth) {
+                  searchCustIds[custlngth] = this.customers[custlngth].getCustomerHeader().getCustomerHeaderPK().getCustId();
+               }
+
+               OrderTransactionsIfc trans = DKartContext.getLookupOrder();
+               pkList = trans.getTranHeadPkForDelivered();
+               ArrayList<OrderTranHeader[]> neworders = trans.getDelOrderbyCustid(searchCustIds, customerSearchCriteria);
+               ListIterator newordLst = neworders.listIterator();
+
+               label82:
+               while(true) {
+                  OrderTranHeader[] y;
+                  do {
+                     if (!newordLst.hasNext()) {
+                        ArrayList<OrderTranHeader> tempTranOders = new ArrayList();
+                        tempTranOders.addAll(temporders);
+                        tempTranOders = this.doProcessHeader(pkList, tempTranOders);
+                        this.orders = new OrderTranHeader[tempTranOders.size()];
+                        this.orders = (OrderTranHeader[])tempTranOders.toArray(this.orders);
+                        this.orders[0].getOrdTranSum().getOrdDlvrDate();
+                        if (this.orders != null) {
+                           this.setSalesAgents(this.getSalesAgents(this.orders));
+                        } else {
+                           this.addActionError("No Orders found");
+                        }
+                        break label82;
+                     }
+
+                     y = (OrderTranHeader[])newordLst.next();
+                  } while(y == null);
+
+                  for(int a = 0; a < y.length; ++a) {
+                     temporders.add(y[a]);
+                  }
+               }
+            }
+
+            this.setOrders(this.orders);
+         }
+      } catch (Exception var12) {
+         System.out.println(var12);
+         this.orders = new OrderTranHeader[0];
+         this.addActionError("No Orders found");
+      }
+
+      return "success";
+   }
+
+   private ArrayList<OrderTranHeader> doProcessHeader(List<OrderTranHeaderPK> tranpk, ArrayList<OrderTranHeader> orders1) {
+      OrderTranHeader[] finalorders = null;
+      ArrayList orderlist = new ArrayList();
+
+      try {
+         if (tranpk != null && orders1 != null) {
+            Iterator var6 = orders1.iterator();
+
+            while(var6.hasNext()) {
+               OrderTranHeader head = (OrderTranHeader)var6.next();
+               if (!tranpk.contains(head.getId())) {
+                  orderlist.add(head);
+               }
+            }
+         }
+      } catch (Exception var7) {
+      }
+
+      return orderlist;
+   }
+
+   private OrderTranHeader[] doProcessHeaderforItem(List<OrderTranHeaderPK> tranpk, OrderTranHeader[] orders1) {
+      OrderTranHeader[] finalorders = null;
+      ArrayList orderlist = new ArrayList();
+
+      try {
+         if (tranpk != null && orders1 != null) {
+            for(int i = 0; i < orders1.length; ++i) {
+               if (!tranpk.contains(orders1[i].getId())) {
+                  orderlist.add(orders1[i]);
+               }
+            }
+         }
+
+         finalorders = (OrderTranHeader[])orderlist.toArray(new OrderTranHeader[orderlist.size()]);
+      } catch (Exception var6) {
+         var6.printStackTrace();
+      }
+
+      return finalorders;
+   }
+
+   private String[] getSalesAgents(OrderTranHeader[] orders2) throws Exception {
+      String[] emids = new String[orders2.length];
+
+      for(int i = 0; i < orders2.length; ++i) {
+         emids[i] = orders2[i].getEmId();
+      }
+
+      LookUpEmployeeIfc lookUpEmp = DKartContext.getLookupEmployee();
+      List<String> salesAgent = lookUpEmp.getSalesAgentsList(emids);
+      String[] salesAgntsList = new String[salesAgent.size()];
+      salesAgntsList = (String[])salesAgent.toArray(salesAgntsList);
+      return salesAgntsList;
+   }
+
+   private String[] getSalesAgentsItemLevel(OrderTranHeader orders) throws Exception {
+      String[] emids = new String[orders.getOrdTranLineItems().size()];
+
+      for(int i = 0; i < orders.getOrdTranLineItems().size(); ++i) {
+         if (((OrderTranLineItem)orders.getOrdTranLineItems().get(i)).getEmpId() != null) {
+            emids[i] = ((OrderTranLineItem)orders.getOrdTranLineItems().get(i)).getEmpId();
+         } else {
+            emids[i] = orders.getEmId();
+         }
+      }
+
+      LookUpEmployeeIfc lookUpEmp = DKartContext.getLookupEmployee();
+      List<String> salesAgent = lookUpEmp.getSalesAgentsList(emids);
+      String[] salesAgntsList = new String[salesAgent.size()];
+      salesAgntsList = (String[])salesAgent.toArray(salesAgntsList);
+      return salesAgntsList;
+   }
+
+   public String InvoiceSearchbyCustomer() throws Exception {
+      this.employee = super.getEmployee();
+      if ((this.InvItemId == null || this.InvItemId.equalsIgnoreCase("")) && this.customerInfo != null && !this.customerInfo.equalsIgnoreCase("")) {
+         this.searchByCustomerNameOrId();
+      } else {
+         this.searchByItemId();
+      }
+
+      if (this.newCustNames.size() > 0) {
+         this.customerName = new String[this.newCustNames.size() - 1];
+         this.setCustomerName((String[])this.newCustNames.toArray(this.customerName));
+      } else {
+         int count = 0;
+         this.addActionError("No invoices were found with this information.");
+         this.newRejectClaimList = new ClaimDetailTable[count];
+         this.setRejecClaimList(this.newRejectClaimList);
+      }
+
+      System.out.println("customerlookup.Service reply: " + this.customers);
+      if (this.newCustinvList != null && this.newCustinvList.size() > 0) {
+         this.setEnblRcrdPaymnt(this.getrecrdpymt(this.getCustomerName(), this.newCustinvList));
+      }
+
+      return "success";
+   }
+
+   private String searchByCustomerNameOrId() {
+      try {
+         int j = 0;
+         System.out.println(this.getInvItemId());
+         System.out.println("InvoiceSearchbyCustomer() custInfo: " + this.customerInfo + ",ItemID/desc = " + this.InvItemId);
+         this.setInvoices(new ArrayList());
+         LookUpCustomerIfc lookUpCustomer = DKartContext.getLookUpCustomer();
+         CustomerSearchCriteria customerSearchCriteria = this.getLookupCriteria();
+         this.customers = lookUpCustomer.lookUpCust(customerSearchCriteria);
+         int custLength = this.customers.length;
+         if (this.customers != null && custLength > 0) {
+            for(; custLength > 0; --custLength) {
+               if (this.customers[custLength - 1].getCustomerSite() != null) {
+                  List<CustomerSite> custSite = this.customers[custLength - 1].getCustomerSite();
+                  ListIterator itr = custSite.listIterator();
+
+                  while(itr.hasNext()) {
+                     this.custinvList = ((CustomerSite)itr.next()).getCustomerSiteInvoiceList();
+                     ListIterator custinvListInd = this.custinvList.listIterator();
+
+                     while(custinvListInd.hasNext()) {
+                        CustomerSiteInvoice custind = (CustomerSiteInvoice)custinvListInd.next();
+                        if (this.getInvType() != null) {
+                           if (custind != null && this.getInvType().equalsIgnoreCase(String.valueOf(custind.getInvStatus()))) {
+                              this.newCustinvList.add(j, custind);
+                              this.paymntTrmsList.add(j, this.customers[custLength - 1].getPaymentTerms().getPayIn());
+                              this.newCustNames.add(j, this.customers[custLength - 1].getCustomerHeader().getCtNm());
+                              ++j;
+                           }
+                        } else {
+                           this.newCustinvList.add(j, custind);
+                           this.newCustNames.add(j, this.customers[custLength - 1].getCustomerHeader().getCtNm());
+                           this.paymntTrmsList.add(j, this.customers[custLength - 1].getPaymentTerms().getPayIn());
+                           ++j;
+                        }
+                     }
+                  }
+               }
+            }
+         } else {
+            this.addActionError("No invoices were found with this information.");
+         }
+
+         if (this.overDueInvoices) {
+            this.setInvoices(this.getOverDueInvoices(this.newCustinvList, this.paymntTrmsList, this.newCustNames));
+         } else {
+            this.setInvoices(this.newCustinvList);
+         }
+
+         return "success";
+      } catch (Exception var9) {
+         this.addActionError("No invoices were found with this information.");
+         return "error";
+      }
+   }
+
+   private String searchByItemId() {
+      try {
+         System.out.println(this.getInvItemId());
+         OrderTransactionsIfc trans = DKartContext.getLookupOrder();
+         this.InvItemId = this.InvItemId.toUpperCase().trim();
+         List<CustomerIfc> invordList = trans.getOrderIdByItemId(this.InvItemId);
+         int k = 0;
+         ListIterator itr = invordList.listIterator();
+
+         while(itr.hasNext()) {
+            CustomerIfc cust1 = (CustomerIfc)itr.next();
+            List<CustomerSiteInvoice> inr = cust1.getSiteInvoices();
+            ListIterator imr = inr.listIterator();
+
+            while(imr.hasNext()) {
+               if (this.customerInfo.length() > 0) {
+                  if (cust1.getCustomerHeader().getCtNm().toLowerCase().contains(this.customerInfo.toLowerCase())) {
+                     this.custSiteinv = (CustomerSiteInvoice)imr.next();
+                     if (this.invType != null) {
+                        if (this.invType.equalsIgnoreCase(String.valueOf(this.custSiteinv.getInvStatus()))) {
+                           this.newCustinvList.add(k, this.custSiteinv);
+                           this.paymntTrmsList.add(k, cust1.getPaymentTerms().getPayIn());
+                           this.newCustNames.add(k, cust1.getCustomerHeader().getCtNm());
+                        }
+                     } else {
+                        this.newCustinvList.add(k, this.custSiteinv);
+                        this.paymntTrmsList.add(k, cust1.getPaymentTerms().getPayIn());
+                        this.newCustNames.add(k, cust1.getCustomerHeader().getCtNm());
+                     }
+                  }
+               } else if (this.invType != null) {
+                  this.custSiteinv = (CustomerSiteInvoice)imr.next();
+                  if (this.invType.equalsIgnoreCase(String.valueOf(this.custSiteinv.getInvStatus()))) {
+                     this.newCustinvList.add(k, this.custSiteinv);
+                     this.paymntTrmsList.add(k, cust1.getPaymentTerms().getPayIn());
+                     this.newCustNames.add(k, cust1.getCustomerHeader().getCtNm());
+                  }
+               } else {
+                  this.newCustinvList.add(k, (CustomerSiteInvoice)imr.next());
+                  this.paymntTrmsList.add(k, cust1.getPaymentTerms().getPayIn());
+                  this.newCustNames.add(k, cust1.getCustomerHeader().getCtNm());
+               }
+            }
+         }
+
+         if (this.overDueInvoices) {
+            this.setInvoices(this.getOverDueInvoices(this.newCustinvList, this.paymntTrmsList, this.newCustNames));
+         } else {
+            this.setInvoices(this.newCustinvList);
+         }
+
+         return "success";
+      } catch (Exception var8) {
+         this.addActionError("No invoices were found with this information.");
+         return "error";
+      }
+   }
+
+   private CustomerSearchCriteria getLookupCriteria() {
+      CustomerSearchCriteria customerSearchCriteria = new CustomerSearchCriteria();
+
+      try {
+         this.customerInfo = this.customerInfo.toUpperCase().trim();
+         Long.parseLong(this.customerInfo);
+         customerSearchCriteria.setCustomerId(this.customerInfo);
+      } catch (Exception var3) {
+         this.customerInfo = this.customerInfo.toUpperCase().trim();
+         customerSearchCriteria.setFirstName(this.customerInfo);
+      }
+
+      return customerSearchCriteria;
+   }
+
+   public String downloadLPO() {
+      try {
+         OrderTransactionsIfc trans = DKartContext.getLookupOrder();
+         OrderTransactionSearchCriteriaIfc search = new OrderTransactionSearchCriteria();
+         search.setSearchByinvoiceNumberOrOrderNumber(true);
+         search.setInvoiceNumberOrOrderNumber(this.orderID);
+         OrderTranHeader[] orders = trans.getTransactionsInvoices(search);
+         String orderId = "";
+         if (orders == null) {
+            throw new Exception("Internal Server Error!!");
+         } else {
+            OrderTransactionLpo orderLpo = null;
+            OrderTranHeader[] var9 = orders;
+            int var8 = orders.length;
+
+            for(int var7 = 0; var7 < var8; ++var7) {
+               OrderTranHeader tranHead = var9[var7];
+               if (tranHead.getOrdTranLpo() != null) {
+                  orderLpo = tranHead.getOrdTranLpo();
+                  orderId = tranHead.getOrdTranSum().getIdOrd();
+                  break;
+               }
+            }
+
+            if (orderLpo != null && orderLpo.getLpoSlipType() != null) {
+               StringBuffer fileName = new StringBuffer(orderId);
+               fileName.append("_");
+               fileName.append(orderLpo.getLpoSlipName());
+               this.setFileName(fileName.toString());
+               this.setMimeType(orderLpo.getLpoSlipType());
+               this.inputStream = new ByteArrayInputStream(orderLpo.getLpoSlipContent());
+               return "success";
+            } else {
+               throw new Exception("LPO Details Not Found!!");
+            }
+         }
+      } catch (Exception var10) {
+         this.addActionError(var10.getMessage());
+         this.inputStream = new StringBufferInputStream(var10.getMessage());
+         return "error";
+      }
+   }
+
+   private String getBillingAdrs(List<CustomerSiteAddress> customerSiteAddressList) {
+      if (customerSiteAddressList != null && customerSiteAddressList.size() > 0) {
+         Iterator var3 = customerSiteAddressList.iterator();
+
+         while(var3.hasNext()) {
+            CustomerSiteAddress address = (CustomerSiteAddress)var3.next();
+            if (address.getTyAds() == '0') {
+               this.billing = "";
+               this.billing = this.billing + address.getA1Cnct() + ",";
+               this.billing = this.billing + (address.getA2Cnct() != null ? address.getA2Cnct() + "," : "");
+               this.billing = this.billing + (address.getA3Cnct() != null ? address.getA3Cnct() + "," : "");
+               this.billing = this.billing + (address.getA4Cnct() != null ? address.getA4Cnct() + "," : "");
+               this.billing = this.billing + (address.getCiCnct() != null ? address.getCiCnct() + "," : "");
+               this.billing = this.billing + (address.getStCnct() != null ? address.getStCnct() + "," : "");
+               this.billing = this.billing + (address.getPcCnct() != null ? address.getPcCnct() + "," : "");
+               this.billing = this.billing + (address.getCoCnct() != null ? address.getCoCnct() : "");
+            }
+         }
+      } else {
+         this.billing = "unknown";
+      }
+
+      return "success";
+   }
+
+   private String getShippingAdrs(OrderTranHeader orders2) {
+      if (orders2 != null && orders2.getCustomer().getSiteInvoices().size() > 0) {
+         String selectedAdres = String.valueOf(orders2.getDeliveryAddressID());
+         if (((CustomerSiteInvoice)orders2.getCustomer().getSiteInvoices().get(0)).getCustomerSite().getCustomerSiteAddressList().size() > 0) {
+            List<CustomerSiteAddress> adrsList = ((CustomerSiteInvoice)orders2.getCustomer().getSiteInvoices().get(0)).getCustomerSite().getCustomerSiteAddressList();
+            Iterator var5 = adrsList.iterator();
+
+            while(true) {
+               while(var5.hasNext()) {
+                  CustomerSiteAddress address = (CustomerSiteAddress)var5.next();
+                  if (address.getTyAds() == '1' && selectedAdres.equalsIgnoreCase(address.getAdsId())) {
+                     this.shipping = "";
+                     this.shipping = this.shipping + address.getA1Cnct() + ",";
+                     this.shipping = this.shipping + (address.getA2Cnct() != null ? address.getA2Cnct() + "," : "");
+                     this.shipping = this.shipping + (address.getA3Cnct() != null ? address.getA3Cnct() + "," : "");
+                     this.shipping = this.shipping + (address.getA4Cnct() != null ? address.getA4Cnct() + "," : "");
+                     this.shipping = this.shipping + (address.getCiCnct() != null ? address.getCiCnct() + "," : "");
+                     this.shipping = this.shipping + (address.getStCnct() != null ? address.getStCnct() + "," : "");
+                     this.shipping = this.shipping + (address.getPcCnct() != null ? address.getPcCnct() + "," : "");
+                     this.shipping = this.shipping + (address.getCoCnct() != null ? address.getCoCnct() : "");
+                  } else {
+                     this.shipping = "unknown";
+                  }
+               }
+
+               return "success";
+            }
+         }
+      }
+
+      return "success";
+   }
+
+   private OrderTranHeader[] getOverDueInvoices(OrderTranHeader[] orders) {
+      OrderTranHeader[] overDueOrders = new OrderTranHeader[orders.length];
+      OrderTranHeader[] newOverDueOrders = null;
+      int i = 0;
+      OrderTranHeader[] var8 = orders;
+      int var7 = orders.length;
+
+      for(int var6 = 0; var6 < var7; ++var6) {
+         OrderTranHeader order = var8[var6];
+         BigInteger payTerm = order.getCustomer().getPaymentTerms().getPayIn();
+         Date invDate = ((CustomerSiteInvoice)order.getCustomer().getSiteInvoices().get(0)).getArInvDate();
+         String[] age = this.calculateInvoiceAge(invDate, '1').split(" ");
+         BigInteger invAge = new BigInteger(age[0]);
+         if (invAge.compareTo(payTerm) > 0) {
+            overDueOrders[i] = order;
+            ++i;
+         }
+      }
+
+      newOverDueOrders = new OrderTranHeader[i--];
+
+      for(int k = 0; k <= i; ++k) {
+         newOverDueOrders[k] = overDueOrders[k];
+      }
+
+      return newOverDueOrders;
+   }
+
+   private List<CustomerSiteInvoice> getOverDueInvoices(List<CustomerSiteInvoice> CustinvList, List<BigInteger> paymntTrmsList2, List<String> newCustNames) {
+      List<CustomerSiteInvoice> overDueInv = new ArrayList();
+      List<String> CustNames = new ArrayList();
+
+      for(int i = 0; i < CustinvList.size(); ++i) {
+         Date invDate = ((CustomerSiteInvoice)CustinvList.get(i)).getArInvDate();
+         BigInteger payTerm = (BigInteger)paymntTrmsList2.get(i);
+         String[] age = this.calculateInvoiceAge(invDate, '1').split(" ");
+         BigInteger invAge = new BigInteger(age[0]);
+         if (invAge.compareTo(payTerm) > 0) {
+            overDueInv.add((CustomerSiteInvoice)CustinvList.get(i));
+            CustNames.add((String)newCustNames.get(i));
+         }
+      }
+
+      newCustNames.clear();
+      newCustNames.addAll(CustNames);
+      return overDueInv;
+   }
+
+   private boolean getrecrdpymt(String[] strings, OrderTranHeader[] orders2) {
+      boolean result = true;
+      int i = 0;
+
+      BigDecimal totalPay;
+      for(totalPay = BigDecimal.valueOf(0L); i < strings.length; ++i) {
+         if (strings.length != i + 1 && !strings[i].equals(strings[i + 1])) {
+            result = false;
+            break;
+         }
+
+         totalPay = totalPay.add(((CustomerSiteInvoice)orders2[i].getCustomer().getSiteInvoices().get(0)).getInvPendAmount());
+      }
+
+      this.setAmtToPay(totalPay);
+      return result;
+   }
+
+   private boolean getrecrdpymt(String[] strings, List<CustomerSiteInvoice> newCustinvList2) {
+      boolean result = true;
+
+      try {
+         int i = 0;
+
+         BigDecimal totalPay;
+         for(totalPay = BigDecimal.valueOf(0L); i < strings.length; ++i) {
+            if (strings.length != i + 1 && !strings[i].equals(strings[i + 1])) {
+               result = false;
+               break;
+            }
+
+            totalPay = totalPay.add(((CustomerSiteInvoice)newCustinvList2.get(i)).getInvPendAmount());
+         }
+
+         this.setAmtToPay(totalPay);
+         return result;
+      } catch (Exception var6) {
+         return result;
+      }
+   }
+
+   public String lpoAttributesLoad() throws FileNotFoundException {
+      System.out.println(ordersLpo);
+      if (ordersLpo[0].getOrdTranLpo() != null) {
+         this.inputStream = new ByteArrayInputStream(ordersLpo[0].getOrdTranLpo().getLpoSlipContent());
+         this.contentType = ordersLpo[0].getOrdTranLpo().getLpoSlipType();
+         this.filename = ordersLpo[0].getOrdTranLpo().getLpoSlipName();
+         this.contentDisposition = "inline;filename=\"" + this.filename + "\"";
+      }
+
+      return "success";
+   }
+
+   public String getItemInfo() {
+      return this.itemInfo;
+   }
+
+   public void setItemInfo(String itemInfo) {
+      this.itemInfo = itemInfo;
+   }
+
+   public String getDatepicker3() {
+      return this.datepicker3;
+   }
+
+   public void setDatepicker3(String datepicker3) {
+      this.datepicker3 = datepicker3;
+   }
+
+   public String getDatepicker4() {
+      return this.datepicker4;
+   }
+
+   public void setDatepicker4(String datepicker4) {
+      this.datepicker4 = datepicker4;
+   }
+
+   public String getOrderTotalFrom() {
+      return this.OrderTotalFrom;
+   }
+
+   public void setOrderTotalFrom(String orderTotalFrom) {
+      this.OrderTotalFrom = orderTotalFrom;
+   }
+
+   public String getOrderTotalTo() {
+      return this.OrderTotalTo;
+   }
+
+   public void setOrderTotalTo(String orderTotalTo) {
+      this.OrderTotalTo = orderTotalTo;
+   }
+
+   public String getInvoiceTotalFrom() {
+      return this.InvoiceTotalFrom;
+   }
+
+   public void setInvoiceTotalFrom(String invoiceTotalFrom) {
+      this.InvoiceTotalFrom = invoiceTotalFrom;
+   }
+
+   public String getInvoiceTotalTo() {
+      return this.InvoiceTotalTo;
+   }
+
+   public void setInvoiceTotalTo(String invoiceTotalTo) {
+      this.InvoiceTotalTo = invoiceTotalTo;
+   }
+
+   public String getOrderID() {
+      return this.orderID;
+   }
+
+   public void setOrderID(String orderID) {
+      this.orderID = orderID;
+   }
+
+   public OrderTranHeader[] getOrders() {
+      return this.orders;
+   }
+
+   public void setOrders(OrderTranHeader[] orders) {
+      this.orders = orders;
+   }
+
+   public String getInvoiceID() {
+      return this.invoiceID;
+   }
+
+   public void setInvoiceID(String invoiceID) {
+      this.invoiceID = invoiceID;
+   }
+
+   public String getCustomerInfo() {
+      return this.customerInfo;
+   }
+
+   public void setCustomerInfo(String customerInfo) {
+      this.customerInfo = customerInfo;
+   }
+
+   public String getInvItemId() {
+      return this.InvItemId;
+   }
+
+   public void setInvItemId(String InvItemId) {
+      if (InvItemId.contains("---")) {
+         String[] itm = InvItemId.split("---");
+
+         try {
+            Long tempId = Long.parseLong(itm[1]);
+            this.InvItemId = itm[1];
+         } catch (Exception var4) {
+            System.out.println(var4);
+            this.InvItemId = itm[0];
+         }
+      } else {
+         this.InvItemId = InvItemId;
+      }
+
+   }
+
+   public String getInvType() {
+      return this.invType;
+   }
+
+   public void setInvType(String invType) {
+      if (invType.equalsIgnoreCase("Open Invoices")) {
+         this.invType = "1";
+         this.overDueInvoices = false;
+      } else if (invType.equalsIgnoreCase("Closed Invoices")) {
+         this.invType = "0";
+         this.overDueInvoices = false;
+      } else if (invType.equalsIgnoreCase("Cancelled Invoices")) {
+         this.invType = "2";
+         this.overDueInvoices = false;
+      } else if (invType.equalsIgnoreCase("Over due")) {
+         this.invType = "1";
+         this.overDueInvoices = true;
+      } else {
+         this.invType = null;
+         this.overDueInvoices = false;
+      }
+
+   }
+
+   public List<CustomerSiteInvoice> getInvoices() {
+      return this.invoices;
+   }
+
+   public void setInvoices(List<CustomerSiteInvoice> list) {
+      this.invoices = list;
+   }
+
+   public OrderTranHeader getOrderDetail() {
+      return this.orderDetail;
+   }
+
+   public void setOrderDetail(OrderTranHeader orders2) {
+      this.orderDetail = orders2;
+   }
+
+   public InputStream getInputStream() {
+      return this.inputStream;
+   }
+
+   public void setInputStream(InputStream is) {
+      this.inputStream = is;
+   }
+
+   public String getDatepicker2() {
+      return this.datepicker2;
+   }
+
+   public void setDatepicker2(String datepicker2) {
+      this.datepicker2 = datepicker2;
+   }
+
+   public String getDatepicker1() {
+      return this.datepicker1;
+   }
+
+   public void setDatepicker1(String datepicker1) {
+      this.datepicker1 = datepicker1;
+   }
+
+   public String getInvoiceStatus() {
+      return this.invoiceStatus;
+   }
+
+   public void setInvoiceStatus(String invoiceStatus) {
+      this.invoiceStatus = invoiceStatus;
+   }
+
+   public String getActiveTab() {
+      return this.activeTab;
+   }
+
+   public void setActiveTab(String activeTab) {
+      this.activeTab = activeTab;
+   }
+
+   public String[] getCustomerName() {
+      return this.customerName;
+   }
+
+   public void setCustomerName(String[] customerName) {
+      this.customerName = customerName;
+   }
+
+   public String getSearchRange() {
+      return this.searchRange;
+   }
+
+   public void setSearchRange(String searchRange) {
+      this.searchRange = searchRange;
+   }
+
+   public String getSalesAgntNme() {
+      return this.salesAgntNme;
+   }
+
+   public void setSalesAgntNme(String salesAgntNme) {
+      this.salesAgntNme = salesAgntNme;
+   }
+
+   public CustomerSiteInvoice getInvDetail() {
+      return this.invDetail;
+   }
+
+   public void setInvDetail(CustomerSiteInvoice invDetail) {
+      this.invDetail = invDetail;
+   }
+
+   public void setSalesAgents(String[] salesAgents) {
+      this.salesAgents = salesAgents;
+   }
+
+   public String[] getSalesAgents() {
+      return this.salesAgents;
+   }
+
+   public String getAge() {
+      return this.age;
+   }
+
+   public void setAge(String age) {
+      this.age = age;
+   }
+
+   public String getShipping() {
+      return this.shipping;
+   }
+
+   public void setShipping(String shipping) {
+      this.shipping = shipping;
+   }
+
+   public String getBilling() {
+      return this.billing;
+   }
+
+   public void setBilling(String billing) {
+      this.billing = billing;
+   }
+
+   public boolean isDownload() {
+      return this.download;
+   }
+
+   public void setDownload(boolean download) {
+      this.download = download;
+   }
+
+   public boolean getEnblRcrdPaymnt() {
+      return this.EnblRcrdPaymnt;
+   }
+
+   public void setEnblRcrdPaymnt(boolean EnblRcrdPaymnt) {
+      this.EnblRcrdPaymnt = EnblRcrdPaymnt;
+   }
+
+   public BigDecimal getAmtToPay() {
+      return this.AmtToPay;
+   }
+
+   public void setAmtToPay(BigDecimal AmtToPay) {
+      this.AmtToPay = AmtToPay;
+   }
+
+   public byte[] getOrder_Lpocntnt() {
+      return this.order_Lpocntnt;
+   }
+
+   public void setOrder_Lpocntnt(byte[] order_Lpocntnt) {
+      this.order_Lpocntnt = order_Lpocntnt;
+   }
+
+   public Image getImgIcn() {
+      return this.imgIcn.getImage();
+   }
+
+   public void setImgIcn(ImageIcon imgIcn) {
+      this.imgIcn = imgIcn;
+   }
+
+   public String getLpoIcmg() {
+      return lpoImg;
+   }
+
+   public void setLpoIcmg(String lpoImg) {
+      Invoice.lpoImg = lpoImg;
+   }
+
+   public String getInvoiceId() {
+      return this.invoiceId;
+   }
+
+   public void setInvoiceId(String invoiceId) {
+      this.invoiceId = invoiceId;
+   }
+
+   public String getContentType() {
+      return this.contentType;
+   }
+
+   public void setContentType(String contentType) {
+      this.contentType = contentType;
+   }
+
+   public String getFilename() {
+      return this.filename;
+   }
+
+   public void setFilename(String filename) {
+      this.filename = filename;
+   }
+
+   public String getContentDisposition() {
+      return this.contentDisposition;
+   }
+
+   public void setContentDisposition(String contentDisposition) {
+      this.contentDisposition = contentDisposition;
+   }
+
+   public OrderTranHeader[] getOrdersLpo() {
+      return ordersLpo;
+   }
+
+   public void setOrdersLpo(OrderTranHeader[] ordersLpo) {
+      Invoice.ordersLpo = ordersLpo;
+   }
+
+   public Date getCurrentDate() {
+      return new Date();
+   }
+
+   public String cancelCustomerInvoice() {
+      String status = "success";
+
+      try {
+         CancelCustomerInvoiceIfc invCancelUtil = DKartContext.getInvoiceCancelUtil();
+         boolean isOfflineInvoice = invCancelUtil.isOfflineInvoice(this.invoiceId);
+         if (!isOfflineInvoice) {
+            boolean isPaymentReceived = invCancelUtil.isPaymentRecevied(this.invoiceId);
+            if (!isPaymentReceived) {
+               boolean isInvoiceCancelled = invCancelUtil.isInvoiceAlreadyCancelled(this.invoiceId, this.orderId);
+               if (!isInvoiceCancelled) {
+                  boolean isMarkedAsDelivered = invCancelUtil.isMarkedAsDelivered(this.orderId);
+                  if (!isMarkedAsDelivered) {
+                     ClaimRemote claim = null;
+                     OrderTransactionsIfc trans = DKartContext.getLookupOrder();
+                     OrderTransactionSearchCriteriaIfc search = new OrderTransactionSearchCriteria();
+                     search.setSearchByinvoiceNumberOrOrderNumber(true);
+                     search.setInvoiceNumberOrOrderNumber(this.invoiceId);
+                     OrderTranHeader orderTran = trans.getTransactionsInvoices(search)[0];
+                     ClaimTranHeader claimHeader = new ClaimTranHeader();
+                     claimHeader.setIdOpr(orderTran.getIdOpr());
+                     claimHeader.setEmId(orderTran.getEmId());
+                     claimHeader.setRcRtnMr("1001");
+                     claimHeader.setFlInvCncl("Y");
+                     claimHeader.setCtDvrInf(orderTran.getCtDvrInf());
+                     claimHeader.setScTran(new BigDecimal(orderTran.getIdBtchInvResv()));
+                     ClaimTranSum claimSum = new ClaimTranSum();
+                     claimSum.setIdOrd(this.orderId);
+                     claimSum.setOrdIdCt(orderTran.getCustomer().getCustomerHeader().getCustomerHeaderPK().getCustId());
+                     String format = "format.currency";
+                     ConfigUtils config = ConfigUtils.getInstance();
+                     claimSum.setDkartNetTot(config.createBigDecimal(orderTran.getOrdTranSum().getDkartNetTot(), format));
+                     claimSum.setDkartSlsTot(config.createBigDecimal(orderTran.getOrdTranSum().getDkartSlsTot(), format));
+                     claimSum.setDkartTndTot(config.createBigDecimal(orderTran.getOrdTranSum().getDkartTndTot(), format));
+                     claimSum.setDkartDscTot(config.createBigDecimal(orderTran.getOrdTranSum().getDkartDscTot(), format));
+                     claimSum.setIdOrdArNmb(this.invoiceId);
+                     claimSum.setIdEm(orderTran.getEmId());
+                     claimHeader.setClaimTranSum(claimSum);
+                     List<OrderTranLineItem> OrderTranLineItemList = orderTran.getOrdTranLineItems();
+                     List<ClaimTranLineItem> claimLineItems = new ArrayList();
+                     Iterator var18 = OrderTranLineItemList.iterator();
+
+                     while(var18.hasNext()) {
+                        OrderTranLineItem orderTranLineItem = (OrderTranLineItem)var18.next();
+                        boolean split = false;
+                        ClaimTranLineItem claimTranLineItem = new ClaimTranLineItem();
+                        claimTranLineItem.setItemId(orderTranLineItem.getItemId());
+                        claimTranLineItem.setDeItmShrtRcpt(orderTranLineItem.getDeItmShrtRcpt());
+                        claimTranLineItem.setLineQnt(orderTranLineItem.getLineQnt());
+                        claimTranLineItem.setItmPrnPrc(config.createBigDecimal(orderTranLineItem.getItmPrnPrc(), format));
+                        BigDecimal qty = orderTranLineItem.getLineQnt();
+                        if (orderTranLineItem.getReturnQtyFlag() != null && orderTranLineItem.getReturnQtyFlag().equals("1")) {
+                           qty = orderTranLineItem.getLineQntRtn();
+                        }
+
+                        claimTranLineItem.setLineQntRtn(qty);
+                        claimTranLineItem.setExtnLnItmRtn(config.createBigDecimal(orderTranLineItem.getExtnLnItmRtn(), format));
+                        claimTranLineItem.setExtnDscLnItm(config.createBigDecimal(orderTranLineItem.getExtnDscLnItm(), format));
+                        claimTranLineItem.setRcRtnMr("1001");
+                        claimTranLineItem.setItmTy(orderTranLineItem.getItmTy());
+                        if (orderTranLineItem.getPriceOverRideFlag() != null && orderTranLineItem.getPriceOverRideFlag().equals("1")) {
+                           claimTranLineItem.setOvrdPrc(config.createBigDecimal(orderTranLineItem.getOverRidePrice(), format));
+                           claimTranLineItem.setRcPrcOvrr(config.createBigDecimal(orderTranLineItem.getPriceOvrrRsnCode(), format).toString());
+                        }
+
+                        List<OrderTranDiscountItem> discountLines = orderTranLineItem.getOrdTranDscItms();
+                        List<ClaimTranDscItm> claimDiscounts = new ArrayList();
+                        Iterator var25 = discountLines.iterator();
+
+                        while(var25.hasNext()) {
+                           OrderTranDiscountItem discount = (OrderTranDiscountItem)var25.next();
+                           ClaimTranDscItm claimDisc = new ClaimTranDscItm();
+                           int scale = ConfigUtils.getInstance().createBigDecimal(0, "format.currency").scale();
+                           claimDisc.setDscAmt(discount.getDscAmt());
+                           claimDisc.setUnitDscAmt(claimDisc.getDscAmt().divide(qty, scale, RoundingMode.HALF_EVEN));
+                           if (claimDisc.getUnitDscAmt().multiply(qty).compareTo(claimDisc.getDscAmt()) != 0) {
+                              split = true;
+                           }
+
+                           claimDisc.setDscPer(discount.getDscPer());
+                           claimDisc.setPrmCmpDtlid(discount.getPrmCmpDtlid());
+                           claimDisc.setPrmCmpId(discount.getPrmCmpId());
+                           claimDisc.setPrmDesc(discount.getPrmDesc());
+                           claimDisc.setPrmId(discount.getPrmId());
+                           claimDisc.setDiscReasonCode(discount.getDiscReasonCode());
+                           if (discount.getPrmType() == null) {
+                              claimDisc.setPrmType(BigDecimal.ZERO);
+                           } else {
+                              claimDisc.setPrmType(discount.getPrmType());
+                           }
+
+                           claimDisc.setSrcTrgList(discount.getSrcTrgList());
+                           claimDisc.setTyDsc(discount.getTyDsc());
+                           ClaimTranDscItmPK claimDiscPK = new ClaimTranDscItmPK();
+                           claimDiscPK.setDiscSeqNum(discount.getId().getDiscSeqNum());
+                           claimDiscPK.setOrdLnItmSeq(discount.getId().getOrdLnItmSeq());
+                           claimDisc.setId(claimDiscPK);
+                           claimDisc.setClaimTranLineItem(claimTranLineItem);
+                           claimDiscounts.add(claimDisc);
+                        }
+
+                        claimTranLineItem.setClaimTranDscItms(claimDiscounts);
+                        if (split) {
+                           LOGGER.info("Lines are being splitted to maintain the proper decimal calculations[unitDiscount] for Item : {}", claimTranLineItem.getItemId());
+                           ClaimTranLineItem clonedClaimLineItem = (ClaimTranLineItem)SerializationUtils.clone(claimTranLineItem);
+                           ClaimRemote claimBean = DKartContext.getClaimBean();
+                           List<ClaimTranLineItem> splittedLines = claimBean.splitLines(clonedClaimLineItem, qty);
+                           claimLineItems.addAll(splittedLines);
+                        } else {
+                           claimLineItems.add(claimTranLineItem);
+                        }
+                     }
+
+                     claimHeader.setClaimTranLineItems(claimLineItems);
+
+                     try {
+                        claim = DKartContext.getClaimBean();
+                        claimHeader.setScOrd(BigDecimal.ONE);
+                        claim.saveClaimTranHeader(claimHeader);
+                        status = "success";
+                     } catch (Exception var29) {
+                        var29.printStackTrace();
+                        status = "failed";
+                     }
+
+                     this.setOrderId(this.orderId);
+                     this.setInvoiceId(this.invoiceId);
+                     SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+                     this.setOrderDate(sdf.parse(orderTran.getId().getDcDyOrd()));
+                     this.setCustId(orderTran.getCustomer().getCustomerHeader().getCustomerHeaderPK().getCustId());
+                     this.setCustName(orderTran.getCustomer().getCustomerHeader().getCtNm());
+                     this.setInvAmt(config.createBigDecimal(orderTran.getOrdTranSum().getDkartNetTot().toString(), format).toString());
+                     this.setInvStatus("Invoice Cancelled");
+                  } else {
+                     this.setInvStatus("Invoice Cancellation Failed");
+                     this.addActionError("Invoice for the Order that is Delivered Cannot be Cancelled");
+                     status = "success";
+                  }
+               } else {
+                  this.setInvStatus("Invoice Cancellation Failed");
+                  this.addActionError("Invoice Already Cancelled (or) Claim is Already Registered for this Invoice / Order");
+                  status = "success";
+               }
+            } else {
+               this.setInvStatus("Invoice Cancellation Failed");
+               this.addActionError("Invoice's for which Full Payment / Partial Payment is Received Cannot be Cancelled");
+               status = "success";
+            }
+         } else {
+            this.setInvStatus("Invoice Cancellation Failed");
+            this.addActionError("Offline Invoice cannot be Cancelled. Try Performing a Return");
+            status = "success";
+         }
+      } catch (Exception var30) {
+         var30.printStackTrace();
+         this.addActionError("Error Occured during Cancelling the Invoice : " + this.invoiceId);
+         this.setInvStatus("Invoice Cancellation Failed");
+         status = "failed";
+      }
+
+      return status;
+   }
+
+   public String deliveredOrderLoadPageAction() {
+      this.employee = super.getEmployee();
+      this.setDelvORderSearchVO(new DelvOrderSearchVO());
+      return "success";
+   }
+
+   public DelvOrderSearchVO getDelvORderSearchVO() {
+      return this.delvORderSearchVO;
+   }
+
+   public void setDelvORderSearchVO(DelvOrderSearchVO delvORderSearchVO) {
+      this.delvORderSearchVO = delvORderSearchVO;
+   }
+
+   public String deliveredOrderSearchByCustAndOrder() {
+      this.employee = super.getEmployee();
+      OrderTransactionSearchCriteriaIfc searchCreteria = new OrderTransactionSearchCriteria();
+      DelvOrderSearchVO searchResult = null;
+      if (this.activeTab == null) {
+         return "success";
+      } else {
+         OrderDAOBeanRemote orderDao;
+         if (this.activeTab.equalsIgnoreCase("tab_1")) {
+            searchCreteria.setSearchByinvoiceNumberOrOrderNumber(true);
+            searchCreteria.setDeliveredORderSearchByItem(false);
+            searchCreteria.setSearchByCustomerInfo(false);
+            searchCreteria.setInvoiceNumberOrOrderNumber(this.orderID.trim());
+            searchCreteria.setOrderDateRangeFrom(this.datepicker1);
+            searchCreteria.setOrderDateRangeTo(this.datepicker2);
+            searchCreteria.setOrderTotalFrom(this.OrderTotalFrom);
+            searchCreteria.setOrderTotalTo(this.OrderTotalTo);
+
+            try {
+               if (this.employee != null) {
+                  orderDao = DKartContext.getOrderDAOBean();
+                  searchResult = orderDao.deliveredOrderSearchByTab1(searchCreteria, this.getEmployee());
+                  LOGGER.info("fetching the default Search Range of Order Search");
+                  this.setSearchRange(DKartContext.getParamterBean().fetchXMLParameterValues().getDeliveredOrderSearchRange());
+                  LOGGER.info("Default Search Range Fetched is :  " + DKartContext.getParamterBean().fetchXMLParameterValues().getDeliveredOrderSearchRange());
+                  if (searchResult.getOrderList() == null) {
+                     searchResult.setOrderList(new ArrayList());
+                  }
+
+                  if (searchResult != null) {
+                     this.setDelvORderSearchVO(searchResult);
+                  } else {
+                     this.setDelvORderSearchVO(new DelvOrderSearchVO());
+                  }
+               }
+            } catch (Exception var5) {
+               var5.printStackTrace();
+            }
+         } else if (this.activeTab.equalsIgnoreCase("tab_3")) {
+            searchCreteria.setSearchByinvoiceNumberOrOrderNumber(false);
+            if (this.customerInfo != null && !this.customerInfo.isEmpty()) {
+               searchCreteria.setDeliveredOrderCustIdOrDes(this.customerInfo.toUpperCase().trim());
+               searchCreteria.setSearchByCustomerInfo(true);
+            } else {
+               searchCreteria.setSearchByCustomerInfo(false);
+            }
+
+            if (this.InvItemId != null && !this.InvItemId.isEmpty()) {
+               searchCreteria.setItemIdOrDescription(this.InvItemId.toUpperCase().trim());
+               searchCreteria.setDeliveredORderSearchByItem(true);
+            } else {
+               searchCreteria.setDeliveredORderSearchByItem(false);
+            }
+
+            try {
+               if (this.getEmployee() != null) {
+                  orderDao = DKartContext.getOrderDAOBean();
+                  searchResult = orderDao.deliveredOrderSearchByTab1(searchCreteria, this.getEmployee());
+                  if (searchResult != null) {
+                     this.setDelvORderSearchVO(searchResult);
+                  } else {
+                     this.setDelvORderSearchVO(new DelvOrderSearchVO());
+                  }
+               }
+            } catch (Exception var4) {
+               var4.printStackTrace();
+            }
+         }
+
+         return "success";
+      }
+   }
+
+   public List<OrdInvShpQtySrlno> getSerialNoList() {
+      return this.serialNoList;
+   }
+
+   public void setSerialNoList(List<OrdInvShpQtySrlno> serialNoList) {
+      this.serialNoList = serialNoList;
+   }
+
+   public OrdInvShpQtySrlno getSerialNo() {
+      return this.serialNo;
+   }
+
+   public void setSerialNo(OrdInvShpQtySrlno serialNo) {
+      this.serialNo = serialNo;
+   }
+
+   public BigDecimal getDeliveredQuantity() {
+      return this.deliveredQuantity;
+   }
+
+   public void setDeliveredQuantity(BigDecimal deliveredQuantity) {
+      this.deliveredQuantity = deliveredQuantity;
+   }
+
+   public boolean isShowDeliveredQuantity() {
+      return this.showDeliveredQuantity;
+   }
+
+   public void setShowDeliveredQuantity(boolean showDeliveredQuantity) {
+      this.showDeliveredQuantity = showDeliveredQuantity;
+   }
+
+   public Map<String, StringBuffer> getSlnoMap() {
+      return this.slnoMap;
+   }
+
+   public void setSlnoMap(Map<String, StringBuffer> slnoMap) {
+      this.slnoMap = slnoMap;
+   }
+
+   public boolean isEnableRecordPaymentButton() {
+      return this.enableRecordPaymentButton;
+   }
+
+   public void setEnableRecordPaymentButton(boolean enableRecordPaymentButton) {
+      this.enableRecordPaymentButton = enableRecordPaymentButton;
+   }
+
+   public String getOpenInvoiceSearchRange() {
+      return this.openInvoiceSearchRange;
+   }
+
+   public void setOpenInvoiceSearchRange(String openInvoiceSearchRange) {
+      this.openInvoiceSearchRange = openInvoiceSearchRange;
+   }
+
+   public String getMimeType() {
+      return this.mimeType;
+   }
+
+   public void setMimeType(String mimeType) {
+      this.mimeType = mimeType;
+   }
+
+   public String getFileName() {
+      return this.fileName;
+   }
+
+   public void setFileName(String fileName) {
+      this.fileName = fileName;
+   }
+}

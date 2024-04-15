@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="ItemImport">
+  	<xs:complexType>
+  		<xs:sequence>
+			<xs:element name="Item" type="Item" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	
+   		<xs:attribute type="xs:byte" name="Priority"/>
+    	<xs:attribute type="xs:string" name="FillType"/>
+    	<xs:attribute type="xs:float" name="Version"/>
+    	<xs:attribute type="xs:byte" name="Batch"/>
+    	<xs:attribute type="xs:dateTime" name="CreationDate"/>
+  	</xs:complexType>
+  </xs:element>
+  
+   <xs:complexType name="Item">
+    <xs:sequence>
+      <xs:element type="Classification" name="Classification"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="ChangeType" use="optional"/>
+    <xs:attribute type="xs:int" name="ID" use="optional"/>
+  </xs:complexType>
+  
+  <xs:complexType name="Classification">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute type="xs:int" name="ID" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+   
+</xs:schema>

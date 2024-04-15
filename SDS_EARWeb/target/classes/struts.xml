@@ -1,0 +1,85 @@
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+	<constant name="struts.devMode" value="false" />
+	<!--<constant name="struts.action.extension" value=""/>-->
+	
+	<constant name="struts.custom.i18n.resources" value="global,items" />
+	<constant name="struts.locale" value="en" />
+
+	<package name="sds-default" extends="json-default">
+		
+		<interceptors>
+			<interceptor name="authentication"
+				class="rispl.ds.common.interceptors.AuthenticationInterceptor"></interceptor>
+			<interceptor name="security"
+				class="rispl.ds.common.interceptors.SecurityInterceptor"></interceptor>
+			<interceptor name="preRequest"
+				class="rispl.ds.common.interceptors.PreReqProcesser"></interceptor>
+			<interceptor-stack name="customStack">
+				<interceptor-ref name="authentication"></interceptor-ref>
+				<interceptor-ref name="security"></interceptor-ref>
+				<interceptor-ref name="preRequest"></interceptor-ref>
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+			</interceptor-stack>
+			<interceptor-stack name="authStack">
+				<interceptor-ref name="authentication"></interceptor-ref>
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+			</interceptor-stack>
+
+		</interceptors>
+
+		<default-interceptor-ref name="customStack"></default-interceptor-ref>
+		
+		<default-class-ref class="rispl.ds.DSAction"></default-class-ref>
+		
+		<global-results>
+			<result name="logout" type="redirectAction">logout</result>
+			<result name="noaccess" type="redirectAction">
+				<param name="actionName">noAccess</param>
+				<param name="action">%{#context['struts.actionMapping'].name}</param>
+			</result>
+			<result name="exception">/globalException.jsp</result>
+		</global-results>
+
+		<global-exception-mappings>
+			<exception-mapping result="exception" exception="java.lang.Exception"></exception-mapping>
+		</global-exception-mappings>
+
+		<action name="noAccess">
+			<interceptor-ref name="authStack"></interceptor-ref>
+			<result name="success">
+				<param name="statusCode">${statusCode}</param>
+				<param name="location">/noAccess.jsp</param>
+			</result>
+		</action>
+		<action name="homePage" class="rispl.ds.homepage.HomePageAction">
+			<interceptor-ref name="authStack"></interceptor-ref>
+			<result>/homePage.jsp</result>
+		</action>
+		<action name="empty">
+			<interceptor-ref name="authStack"></interceptor-ref>
+			<result>/empty.jsp</result>
+		</action>
+	</package>
+	
+	<!-- Comment below when in production -->
+	<include file="struts-dev.xml"></include>
+	
+	<include file="struts-login.xml"></include>
+	<include file="struts-customer.xml"></include>
+	<include file="struts-newOrder.xml"></include>
+	<include file="struts-claims.xml"></include>
+	<include file="struts-invoice.xml"></include>
+	<include file="struts-orders.xml"></include>
+	<include file="struts-dashboard.xml"></include>
+	<include file="struts-payment.xml"></include>
+	<include file="struts-inventory.xml"></include>
+	<include file="struts-changepassword.xml"></include>
+	<include file="struts-download-pdf.xml"></include>
+	<!-- Chiranjibee Comments To Add struts-parameter.xml file into struts.xml -->
+	<include file="struts-admin.xml"></include>
+
+</struts>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
+
+	<named-query name="CLAIM_TO_APPROVE_FILTER_BY_DIVISION">
+		<query>
+		SELECT c FROM ClaimDetail c WHERE c.status = 1 AND c.divisionId IN :divisionIds
+		ORDER BY c.id.claimDate DESC
+		</query>
+	</named-query>
+	
+	<named-query name="CLAIM_TO_APPROVE_FILTER_BY_LINKED">
+		<query>
+		SELECT c FROM ClaimDetail c WHERE c.status = 1 AND c.empId = :empId
+		ORDER BY c.id.claimDate DESC
+		</query>
+	</named-query>
+	
+	<named-query name="CLAIM_TO_APPROVE_FILTER_BY_NONE">
+		<query>
+		SELECT c FROM ClaimDetail c WHERE c.status = 1
+		ORDER BY c.id.claimDate DESC
+		</query>
+	</named-query>
+	
+	<named-query name="CLAIM_TO_ACCEPT_FILTER_BY_DIVISION">
+		<query>
+		SELECT cth FROM ClaimTranHeader cth WHERE cth.scOrd=4 AND 
+		cth.claimTranSum.ordIdCt IN (SELECT ch.customerHeaderPK.custId FROM CustomerHeader ch WHERE 
+		ch.customerHeaderPK.custId = cth.claimTranSum.ordIdCt AND
+		cast(substring(ch.divisionId, (locate(':',ch.divisionId)+1))  NUMERIC(6,0)) IN :divisionIds)
+		ORDER BY cth.id.dcDyOrd DESC
+		</query>
+	</named-query>
+	
+	<named-query name="CLAIM_TO_ACCEPT_FILTER_BY_LINKED">
+		<query>
+		SELECT cth FROM ClaimTranHeader cth WHERE cth.scOrd=4 AND 
+		cth.emId = :empId ORDER BY cth.id.dcDyOrd DESC
+		</query>
+	</named-query>
+	
+	<named-query name="CLAIM_TO_ACCEPT_FILTER_BY_NONE">
+		<query>
+		SELECT cth FROM ClaimTranHeader cth WHERE cth.scOrd=4 ORDER BY cth.id.dcDyOrd DESC
+		</query>
+	</named-query>
+	
+	<named-query name="GET_CLAIM_BY_ORDERID">
+		<query>
+		SELECT claimHead FROM ClaimTranHeader claimHead
+			JOIN claimHead.claimTranSum claimSum
+			where claimSum.idOrd=:idOrd
+		</query>
+	</named-query>
+	<named-query name="GET_INVOICE_DETAILS">
+		<query>
+		SELECT claimHead FROM ClaimTranHeader claimHead
+			JOIN claimHead.claimTranSum claimSum
+			where claimSum.idOrd=:idOrd
+		</query>
+	</named-query>
+	<!-- added by lokesh to get claim details by claim id from order tables -->
+	<named-query name="GET_CLAIM_DETAILS_BY_CLAIMID">
+		<query>
+		SELECT ordHead FROM OrderTranHeader ordHead
+			where ordHead.acceptClaimId=:acceptClaimId
+		</query>
+	</named-query>
+	
+	<named-query name="CLAIM_RECEIVED_DETAILS_BY_CLAIMID">
+		<query>SELECT c FROM ClaimReceivedDetail c WHERE c.id.claimId=:claimId</query>
+		<hint name="eclipselink.refresh " value="TRUE"></hint>
+		<hint name="eclipselink.read-only" value="TRUE"></hint>
+	</named-query>
+	
+	<named-query name="ACCEPTED_CLAIM_FILTER_BY_DIVISION">
+		<query>
+		SELECT cth FROM ClaimTranHeader cth WHERE cth.scOrd=5 AND cth.acceptType=1 AND 
+		cth.claimTranSum.ordIdCt IN (SELECT ch.customerHeaderPK.custId FROM CustomerHeader ch WHERE 
+		ch.customerHeaderPK.custId = cth.claimTranSum.ordIdCt AND
+		cast(substring(ch.divisionId, (locate(':',ch.divisionId)+1))  NUMERIC(6,0)) IN :divisionIds)
+		ORDER BY cth.id.dcDyOrd DESC
+		</query>
+	</named-query>
+	
+	<named-query name="ACCEPTED_CLAIM_FILTER_BY_LINKED">
+		<query>
+		SELECT cth FROM ClaimTranHeader cth WHERE cth.scOrd=5 AND cth.acceptType=1 AND 
+		cth.emId = :empId ORDER BY cth.id.dcDyOrd DESC
+		</query>
+	</named-query>
+	<named-query name="ACCEPTED_CLAIM_FILTER_BY_NONE">
+		<query>
+		SELECT cth FROM ClaimTranHeader cth WHERE cth.scOrd=5 AND cth.acceptType=1 ORDER BY cth.id.dcDyOrd DESC
+		</query>
+	</named-query>
+	<!-- added by sharanya to get DataEntryOptr mail id -->
+		 <named-native-query name="DataEntryOptr_MAIL_ID">
+		<query>
+			<![CDATA[
+			SELECT EMPMSTR.EMAIL FROM RISPL_DK_EMP_MSTR EMPMSTR WHERE EMPMSTR.EMP_ID IN ( 
+			SELECT HEAD.ID_OPR FROM CLAIM_TRAN_HEADER HEAD JOIN CLAIM_TRAN_SUM SUM ON HEAD.ORD_WS = SUM.ORD_WS 
+			AND HEAD.RT_STR_ID = SUM.RT_STR_ID 
+			AND HEAD.TRN_SEQ = SUM.TRN_SEQ 
+			AND HEAD.DC_DY_ORD = SUM.DC_DY_ORD WHERE HEAD.CLAIM_ID = ?
+			)
+			]]>
+		</query>
+	</named-native-query> 
+</entity-mappings>

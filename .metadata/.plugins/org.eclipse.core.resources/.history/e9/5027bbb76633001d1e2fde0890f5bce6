@@ -1,0 +1,13 @@
+ApplyingExpensesError =Unable to apply {0} because Service Item {1} is Not Found for Store Id {2}
+claim.status.new = NEW
+#restockingFee.serviceitem.id=101304350
+restockingFee.serviceitem.id=100500281
+#transportationFee.serviceitem.id=101304430
+transportationFee.serviceitem.id=100500272
+Perfume.shippingMethod.serviceitem.id=104951821
+FMCG.shippingMethod.serviceitem.id=100500272
+CE.shippingMethod.serviceitem.id=100500272
+Home.shippingMethod.serviceitem.id=100500272
+restockingFee.Name =Restocking Fee
+transportationFee.Name = Transportation Fee
+AfterQuoteDilogText=Promotions and discounts will be applied and the final quote will be calculated.

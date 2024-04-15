@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<deployment-plan xmlns="http://xmlns.oracle.com/weblogic/deployment-plan" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.oracle.com/weblogic/deployment-plan http://xmlns.oracle.com/weblogic/deployment-plan/1.0/deployment-plan.xsd">
+  <application-name>SDS_EAR</application-name>
+  <variable-definition>
+    <variable>
+      <name>SessionDescriptor_InvalidationIntervalSecs_17016926396560</name>
+      <value>300</value>
+    </variable>
+  </variable-definition>
+  <module-override>
+    <module-name>split_src</module-name>
+    <module-type>ear</module-type>
+    <module-descriptor external="false">
+      <root-element>weblogic-application</root-element>
+      <uri>META-INF/weblogic-application.xml</uri>
+      <variable-assignment>
+        <name>SessionDescriptor_InvalidationIntervalSecs_17016926396560</name>
+        <xpath>/weblogic-application/session-descriptor/invalidation-interval-secs</xpath>
+      </variable-assignment>
+    </module-descriptor>
+    <module-descriptor external="false">
+      <root-element>application</root-element>
+      <uri>META-INF/application.xml</uri>
+    </module-descriptor>
+    <module-descriptor external="true">
+      <root-element>wldf-resource</root-element>
+      <uri>META-INF/weblogic-diagnostics.xml</uri>
+    </module-descriptor>
+  </module-override>
+  <module-override>
+    <module-name>SDS_EAREJB-0.0.1.jar</module-name>
+    <module-type>ejb</module-type>
+    <module-descriptor external="false">
+      <root-element>weblogic-ejb-jar</root-element>
+      <uri>META-INF/weblogic-ejb-jar.xml</uri>
+    </module-descriptor>
+    <module-descriptor external="false">
+      <root-element>ejb-jar</root-element>
+      <uri>META-INF/ejb-jar.xml</uri>
+    </module-descriptor>
+    <module-descriptor external="true">
+      <root-element>persistence-configuration</root-element>
+      <uri>META-INF/persistence-configuration.xml</uri>
+    </module-descriptor>
+    <module-descriptor external="false">
+      <root-element>persistence</root-element>
+      <uri>META-INF/persistence.xml</uri>
+    </module-descriptor>
+  </module-override>
+  <module-override>
+    <module-name>SDS_EARWeb-0.0.1.war</module-name>
+    <module-type>war</module-type>
+    <module-descriptor external="false">
+      <root-element>weblogic-web-app</root-element>
+      <uri>WEB-INF/weblogic.xml</uri>
+    </module-descriptor>
+    <module-descriptor external="false">
+      <root-element>web-app</root-element>
+      <uri>WEB-INF/web.xml</uri>
+    </module-descriptor>
+  </module-override>
+  <config-root>E:\MY_SDS\KUNAL-SDS-LOCAL\.metadata\.plugins\org.eclipse.core.resources\.projects\SDS_EAR\beadep\base_domain\SDS_EAR\plan</config-root>
+</deployment-plan>

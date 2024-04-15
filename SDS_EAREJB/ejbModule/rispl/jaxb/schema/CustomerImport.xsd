@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+/* ===========================================================================
+* Copyright (c) 2009, 2013, Oracle and/or its affiliates. All rights reserved. 
+ * ===========================================================================
+ * $Header: rgbustores/internal/DIMP/Customer/CustomerImport.xsd /main/9 2013/02/05 16:41:06 cgreene Exp $
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED    (MM/DD/YY)
+ *    cgreene   02/05/13 - rename common.xsd to CommonImport.xsd
+ *    mchellap  12/14/12 - Added customer receipt preference
+ *    tksharma  08/01/11 - CustomerImport Data Fix
+ *    abondala  01/02/10 - Update Header date
+ *
+ * ===========================================================================
+ */
+-->
+<!--
+/* ===========================================================================
+* Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved. 
+ * ===========================================================================
+ * $Header: rgbustores/internal/DIMP/Customer/CustomerImport.xsd /main/9 2013/02/05 16:41:06 cgreene Exp $
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED    (MM/DD/YY)
+ *    sgu       05/01/09 - fix customer group DIMP for its I8 table
+ *    masahu    03/17/09 - Pricing Group import moved to Customer imports
+ *    cgreene   12/04/08 - implement customer import delta deletes
+ *    cgreene   11/24/08 - implement customer data import
+ *    cgreene   11/19/08 - migrate common types to ../CommonImport.xsd
+ *
+ * ===========================================================================
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+	<xs:annotation><xs:documentation>
+		Customer Import Schema. Copyright 2008 Oracle. All rights reserved.
+
+		Use this schema in conjuction with a Oracle Store Systems Data Dictionary
+		and the relations between the element and attribute names should be
+		apparent.
+	</xs:documentation></xs:annotation>
+
+	<xs:include schemaLocation="../CommonImport.xsd" />
+	<xs:element name="CustomerImport">
+		<xs:annotation><xs:documentation>
+			Top-level element holding a collection of Customer elements.
+		</xs:documentation></xs:annotation>
+		<xs:complexType>
+		<xs:sequence>
+			<xs:element name="CustomerGroup" type="CustomerGroup_type" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="PricingGroup" type="PricingGroup" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="Customer" type="Customer_type" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="BusinessCustomer" type="BusinessCustomer_type" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="FillType" type="FillType_type" use="required"/>
+		<xs:attribute name="CreationDate" type="xs:dateTime"/>
+		<xs:attribute name="ExpirationDate" type="xs:dateTime"/>
+		<xs:attribute name="Version" type="xs:string"/>
+		<xs:attribute name="Priority" type="xs:int"/>
+		<xs:attribute name="Batch" type="xs:int"/>
+	</xs:complexType>
+	</xs:element>
+
+	
+
+	<xs:complexType name="CustomerGroup_type">
+		<xs:annotation><xs:documentation>
+			Represents a group of customers that can be marketed to,
+			e.g. seniors, teachers, etc. These groups are typically used
+			to trigger transaction-level discounts.
+		</xs:documentation></xs:annotation>
+		<xs:sequence>
+			<xs:element name="LocalizedNameDescription" type="LocalizedNameDescription_type" minOccurs="1" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="ChangeType" type="ChangeType_type" use="required"/>
+		<xs:attribute name="ID" type="xs:int" use="required"/>
+	</xs:complexType>
+
+    <xs:complexType name="PricingGroup">
+            <xs:choice>
+                <xs:element name="LocalizedName" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="Name" type="NameDescription_type" minOccurs="1" maxOccurs="1"/>
+            </xs:choice>
+            <xs:attribute name="ID" type="xs:int" />
+            <xs:attribute name="ChangeType" type="ChangeType_type" default="ADD"/>
+    </xs:complexType>
+
+	<xs:complexType name="Customer_type">
+		<xs:annotation><xs:documentation>
+			Represents a single customer's information. Each Address, Telephone
+			and Email should have a different Type because the Type becomes
+			part of the primary key for that record.
+		</xs:documentation></xs:annotation>
+		<xs:sequence>
+			<xs:element name="Address" type="Address_type" minOccurs="0" maxOccurs="5"/>
+			<xs:element name="Telephone" type="Telephone_type" minOccurs="0" maxOccurs="7"/>
+			<xs:element name="Email" type="Email_type" minOccurs="0" maxOccurs="4"/>
+    		<xs:element name="CustomerGroupID" type="CustomerGroupID_type" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="ChangeType" type="ChangeType_type" use="required"/>
+		<xs:attribute name="ID" type="ID_type" use="required"/>
+		<xs:attribute name="FirstName" type="xs:string"/>
+		<xs:attribute name="LastName" type="xs:string"/>
+		<xs:attribute name="MiddleName" type="xs:string"/>
+		<xs:attribute name="Salutation" type="xs:string"/>
+		<xs:attribute name="Suffix" type="xs:string"/>
+		<xs:attribute name="BirthDate" type="xs:date"/>
+		<xs:attribute name="Gender" type="Gender_type"/>
+		<xs:attribute name="ContactByMail" type="xs:boolean"/>
+		<xs:attribute name="ContactByPhone" type="xs:boolean"/>
+		<xs:attribute name="ContactByEmail" type="xs:boolean"/>
+        <xs:attribute name="ReceiptPreference" type="receipt_preference"/>        
+		<xs:attribute name="EmployeeID" type="EmployeeID_type"/>
+		<xs:attribute name="Status" type="Status_type"/>
+		<xs:attribute name="EncryptedHouseAccountNumber" type="xs:string"/>
+		<xs:attribute name="PricingGroupID" type="xs:int"/>
+		<xs:attribute name="PreferredLanguage" type="Language_type"/>
+		<xs:attribute name="PreferredCountry" type="Country_type"/>
+		<xs:attribute name="EncryptTaxID" type="xs:string"/>
+	</xs:complexType>
+
+	<xs:complexType name="BusinessCustomer_type">
+		<xs:annotation><xs:documentation>
+			Represents a single business's information. In this case, setting
+			any person attributes, like FirstName would be for the company's
+			contact.
+		</xs:documentation></xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="Customer_type">
+				<xs:attribute name="CompanyName" type="xs:string" use="required" />
+				<xs:attribute name="TaxExemptionCertificate" type="xs:string" />
+				<xs:attribute name="ExceptionReason" type="xs:string" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="CustomerGroupID_type">
+        <xs:annotation><xs:documentation>
+            Its only necessary to specify a ChangeType when updating a customer
+            and deleting the specified customer group.
+        </xs:documentation></xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="xs:int">
+                <xs:attribute name="ChangeType" type="xs:string" use="optional" default="DEL"/>
+				<xs:attribute name="IdentityVerificationRequired" type="xs:boolean" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:complexType name="Address_type">
+		<xs:annotation><xs:documentation>
+			Its only necessary to specify a ChangeType when updating a customer
+			and deleting the specified address.
+		</xs:documentation></xs:annotation>
+		<xs:attribute name="ChangeType" type="xs:string" use="optional" default="DEL"/>
+		<xs:attribute name="Type" type="AddressType_type" use="required"/>
+		<xs:attribute name="Address1" type="xs:string" use="required"/>
+		<xs:attribute name="Address2" type="xs:string" use="optional"/>
+		<xs:attribute name="Address3" type="xs:string" use="optional"/>
+		<xs:attribute name="City" type="xs:string" use="required"/>
+		<xs:attribute name="State" type="xs:string"/>
+		<xs:attribute name="PostalCode" type="xs:string"/>
+		<xs:attribute name="Territory" type="xs:string"/>
+		<xs:attribute name="Country" type="xs:string"/>
+	</xs:complexType>
+
+	<xs:complexType name="Telephone_type">
+		<xs:annotation><xs:documentation>
+			Its only necessary to specify a ChangeType when updating a customer
+			and deleting the specified telephone.
+		</xs:documentation></xs:annotation>
+		<xs:attribute name="ChangeType" type="xs:string" use="optional" default="DEL"/>
+		<xs:attribute name="Type" type="TelephoneType_type" use="required"/>
+		<xs:attribute name="Number" type="xs:string" use="required"/>
+		<xs:attribute name="Ext" type="xs:string"/>
+	</xs:complexType>
+
+	<xs:complexType name="Email_type">
+		<xs:annotation><xs:documentation>
+			Its only necessary to specify a ChangeType when updating a customer
+			and deleting the specified email.
+		</xs:documentation></xs:annotation>
+		<xs:attribute name="ChangeType" type="xs:string" use="optional" default="DEL"/>
+		<xs:attribute name="Type" type="EmailType_type" use="required"/>
+		<xs:attribute name="Address" type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<xs:simpleType name="Gender_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Unspecified"/>
+			<xs:enumeration value="Female"/>
+			<xs:enumeration value="Male"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="EmployeeID_type">
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="10"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Status_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Inactive"/>
+			<xs:enumeration value="Active"/>
+			<xs:enumeration value="Deleted"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="AddressType_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Unspecified"/>
+			<xs:enumeration value="Home"/>
+			<xs:enumeration value="Work"/>
+			<xs:enumeration value="Other"/>
+			<xs:enumeration value="Mail"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="TelephoneType_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Unspecified"/>
+			<xs:enumeration value="Home"/>
+			<xs:enumeration value="Work"/>
+			<xs:enumeration value="Mobile"/>
+			<xs:enumeration value="Fax"/>
+			<xs:enumeration value="Pager"/>
+			<xs:enumeration value="Other"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="EmailType_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Unspecified"/>
+			<xs:enumeration value="Home"/>
+			<xs:enumeration value="Work"/>
+			<xs:enumeration value="Other"/>
+		</xs:restriction>
+	</xs:simpleType>
+    
+    <xs:simpleType name="receipt_preference">
+        <xs:restriction base="xs:string">
+                <xs:maxLength value="5"/>
+                  <xs:enumeration value="NONE"/>
+                  <xs:enumeration value="PRINT"/>
+                  <xs:enumeration value="EMAIL"/>
+                  <xs:enumeration value="BOTH"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>

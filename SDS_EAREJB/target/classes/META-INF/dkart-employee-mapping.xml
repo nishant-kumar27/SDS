@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
+
+	<named-query name="FIND_EMPLOYEE_BY_ROLE">
+		<query>
+		select employee from RisplDkEmpMstr employee
+		where (employee.id.empId like :agentId
+		OR employee.empNme like :agentName) AND
+		(employee.risplDkEmpRole.roleId = :roleId OR
+		:roleId is null)
+		</query>
+	</named-query>
+
+	<named-query name="FIND_EMPLOYEE">
+		<query>
+		select employee from RisplDkEmpMstr employee
+		where employee.loginId = :employeeLogInId
+		</query>
+	</named-query>
+	
+	<named-query name="FIND_EMPLOYEE_BY_LOGINID_OR_EMPID">
+		<query>
+		select employee from RisplDkEmpMstr employee
+		where employee.loginId = :employeeLogInId or
+		employee.id.empId = :employeeId
+		</query>
+	</named-query>
+	
+	<named-query name="FIND_SALES_AGENT_FOR_ORDER">
+		<query>
+		SELECT ots.ordTranHeader.emId FROM OrderTranSum ots WHERE ots.idOrd=:orderID
+		</query>
+	</named-query>
+	
+	<named-query name="FIND_EMP_BY_ROLE">
+		<query>
+		SELECT emp FROM RisplDkEmpMstr emp WHERE emp.risplDkEmpRole.roleId=?1
+		</query>
+	</named-query>
+	
+	<named-query name="DEL_EMP_MSTR">
+		<query>
+		DELETE FROM RisplDkEmpMstr  e
+		</query>
+	</named-query>
+	
+	<named-query name="DEL_EMP_PWD_HST">
+		<query>
+		DELETE FROM RisplDkEmpPwdHist  e
+		</query>
+	</named-query>
+	<named-query name="DEL_EMP_MERCH_ASSOC">
+		<query>
+		DELETE FROM RisplDkEmpMerchAssoc  e
+		</query>
+	</named-query>
+</entity-mappings>

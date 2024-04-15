@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+/* ===========================================================================
+* Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved. 
+ * ===========================================================================
+ * $Header: rgbustores/internal/DIMP/CommonImport.xsd /main/9 2013/02/05 16:41:06 cgreene Exp $
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED    (MM/DD/YY)
+ *    cgreene   02/05/13 - rename common.xsd to CommonImport.xsd
+ *    cgreene   05/23/12 - added laungage codes
+ *    vikini    03/06/09 - adding NameDescription_type
+ *    acadar    01/08/09 - increase length decimal
+ *    cgreene   11/19/08 - migrate common types to ../CommonImport.xsd
+ *    vikini    11/11/08 - Checked in ILRM specific tags for DIMP
+ *    glwang    11/10/08 - change the element names in xsd
+ *
+ * ===========================================================================
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	   <xs:simpleType name="Language_type">
+		<xs:annotation><xs:documentation>
+			ISO-639 based two-character codes to specify what language
+			that a text is being provided in. if left unspecified, the
+			system's default (country of origin) language is assumed.
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:length value="2" />
+                <xs:enumeration value="de" />
+                <xs:enumeration value="el" />
+                <xs:enumeration value="en" />
+                <xs:enumeration value="es" />
+                <xs:enumeration value="fr" />
+                <xs:enumeration value="hr" />
+                <xs:enumeration value="hu" />
+                <xs:enumeration value="it" />
+                <xs:enumeration value="ja" />
+                <xs:enumeration value="ko" />
+                <xs:enumeration value="nl" />
+                <xs:enumeration value="pl" />
+                <xs:enumeration value="pt" />
+                <xs:enumeration value="ru" />
+                <xs:enumeration value="sv" />
+                <xs:enumeration value="tr" />
+                <xs:enumeration value="zh" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Country_type">
+		<xs:annotation><xs:documentation>
+			ISO-3166 based two-character codes to specify what country
+			that a text is being provided in. It could be left as unspecified.
+            E.g. country code "TW" combined with language "zh" is traditional
+            Chinese.
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:length value="2" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Description_type">
+		<xs:restriction base="xs:string">
+			<xs:annotation><xs:documentation>
+				The length here is defined as the length of single byte string.
+				If the multibyte characters are used, the max length should be
+				250/4 = 60.
+			</xs:documentation></xs:annotation>
+			<xs:maxLength value="250"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Name_type">
+		<xs:restriction base="xs:string">
+			<xs:annotation><xs:documentation>
+				The length here is defined as the length of single byte string.
+				If the multibyte characters are used, the max length should be
+				120/4 = 30.
+			</xs:documentation></xs:annotation>
+			<xs:maxLength value="120"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="LocalizedName_type">
+		<xs:simpleContent>
+			<xs:extension base="Name_type">
+				<xs:attribute name="Language" type="Language_type"/>
+				<xs:attribute name="Country" type="Country_type"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:complexType name="LocalizedDescription_type">
+		<xs:simpleContent>
+			<xs:extension base="Description_type">
+				<xs:attribute name="Language" type="Language_type"/>
+				<xs:attribute name="Country" type="Country_type"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:complexType name="LocalizedNameDescription_type">
+		<xs:attribute name="Name" type="Name_type" />
+		<xs:attribute name="Description" type="Description_type" />
+		<xs:attribute name="Language" type="Language_type"/>
+		<xs:attribute name="Country" type="Country_type"/>
+	</xs:complexType>
+	
+	<xs:complexType name="NameDescription_type">
+		<xs:attribute name="Name" type="Name_type" use="required" />
+		<xs:attribute name="Description" type="Description_type" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="LocalizedItemSizeDescription_type">
+		<xs:annotation><xs:documentation>
+			This is used to define a size description for a certain locale.
+		</xs:documentation></xs:annotation>
+		<xs:attribute name="TableName" type="Name_type" />
+		<xs:attribute name="TableDesc" type="Description_type" />
+		<xs:attribute name="TypeDesc" type="Name_type" />
+		<xs:attribute name="ProportionDesc" type="Description_type" />
+		<xs:attribute name="Language" type="Language_type"/>
+		<xs:attribute name="Country" type="Country_type"/>
+	</xs:complexType>
+
+	<xs:complexType name="LocalizedMessageDescription_type">
+		<xs:annotation><xs:documentation>
+			This is used to define a Message description for a certain locale.
+		</xs:documentation></xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="Description_type">
+				<xs:attribute name="Name" type="xs:string"/>
+				<xs:attribute name="Language" type="Language_type"/>
+				<xs:attribute name="Country" type="Country_type"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:simpleType name="ID_type">
+		<xs:annotation><xs:documentation>
+			Id's for items and customers can only be 14 chars long
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="14"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="RetailStoreId_type">
+		<xs:annotation><xs:documentation>
+			Store Id's can only be five characters long and preferably only
+			numerals.
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"></xs:minLength>
+			<xs:maxLength value="5"></xs:maxLength>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ChangeType_type">
+		<xs:annotation><xs:documentation>
+			Whether the record in question is being ADDed, UPDated, or DELeted.
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="ADD" />
+			<xs:enumeration value="UPD" />
+			<xs:enumeration value="DEL" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="FillType_type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="KillAndFill"/>
+			<xs:enumeration value="DeltaIncremental"/>
+			<xs:enumeration value="FullIncremental"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="CurrencyCode_type">
+	   <xs:annotation><xs:documentation>
+			ISO-4217 based three characters codes to specify what currency
+			that an amount is being specified in. Usually, if left unspecified,
+			the system's default (country of origin) currency type is assumed.
+		</xs:documentation></xs:annotation>
+		<xs:restriction base="xs:string">
+			 <xs:length value="3" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Amount_type">
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="13"/>
+			<xs:fractionDigits value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="CurrencyAmount_type">
+		<xs:annotation><xs:documentation>
+			An amount with an optionally specified currency code.
+		</xs:documentation></xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="Amount_type">
+				<xs:attribute name="CurrencyCode" type="CurrencyCode_type">
+					<xs:annotation><xs:documentation>
+						Not specifying the currency code will assume that the
+						currency type should default to the system default
+						currency.
+					</xs:documentation></xs:annotation>
+				</xs:attribute>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+</xs:schema>

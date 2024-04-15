@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified">
+
+	<xs:annotation>
+		<xs:documentation>
+			SDS Parameter Schema
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:element name="SDSParameterImport">
+		<xs:annotation>
+			<xs:documentation>
+				Top-level element holding a collection of SDS
+				Parameter elements.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="SDSParameter" type="SDSParameter_Type"
+					minOccurs="1" maxOccurs="1" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="SDSParameter_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="DashBoard" type="DashBoard_Type"
+				minOccurs="1" maxOccurs="1" />
+			<xs:element name="Order" type="Order_Type" minOccurs="1"
+				maxOccurs="1" />
+			<xs:element name="Invoice" type="Invoice_Type" minOccurs="1"
+				maxOccurs="1" />
+			<xs:element name="Payment" type="Payment_Type" minOccurs="1"
+				maxOccurs="1" />
+			<xs:element name="Claim" type="Claim_Type" minOccurs="1"
+				maxOccurs="1" />
+			<xs:element name="Customer" type="Customer_Type"
+				minOccurs="1" maxOccurs="1" />
+			<xs:element name="Notification" type="Notification_Type"
+				minOccurs="1" maxOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="DashBoard_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS DashBoard
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="DashboardRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Order_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Order
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="OrderSearch" type="OrderSearch_Type"
+				minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="BookOrder" type="BookOrder_Type"
+				minOccurs="1" maxOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="OrderSearch_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Order Search
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="OrderSearchRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="OpenOrderSearchRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="DeliveredOrderSearchRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="CancelledOrderSearchRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="ReturnedOrderSearchRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="SaveOrderSearchRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="DataEntryRoleID" type="xs:integer"
+				default="6" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="SalesAgentRoleID" type="xs:integer"
+				default="5" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="DivisionHeadRoleID" type="xs:integer"
+				default="7" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+
+	<xs:complexType name="BookOrder_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS BOOK Order
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="CheckForAvailableInventory" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableBookOrderManagerOverride" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableRebateCustomerForExpiryItems"
+				type="Boolean_Type" default="No" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="DiscountPercentageLimit" type="IntgerLimit_Type"
+				default="0" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableDoubleDiscounts" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableExceedingCustomerAvailableLimit"
+				type="Boolean_Type" default="No" minOccurs="1" maxOccurs="1"></xs:element>
+
+			<xs:element name="OrderExpiryDays" type="IntgerLimit_Type"
+				default="30" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="ScheduledDeliveryOrderBeforeNoOfDays"
+				type="IntgerLimit_Type" default="7" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToCustomer" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToDeptHead" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToSalesAgent" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToDataEntryOperator"
+				type="Boolean_Type" default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableGroupingDiscountedLineItems" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="InceaseAvailLimitPercenatageForSegmentA"
+				type="IntgerLimit_Type" default="0" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="InceaseAvailLimitPercenatageForSegmentB"
+				type="IntgerLimit_Type" default="0" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="InceaseAvailLimitPercenatageForSegmentC"
+				type="IntgerLimit_Type" default="0" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+
+
+	<xs:complexType name="Invoice_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Invoices
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="InvoiceSearch" type="InvoiceSearch_Type"
+				minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="InvoiceSearch_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Invoices Search
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="InvoiceSearchRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="OpenInvoiceRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSDSOfflineInvoice" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="OfflineInvoiceGenerationTimeInMinutes"
+				type="IntgerLimit_Type" default="30" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableInvoiceCancellation" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableMarkAsDeliveredForOfflineInvoice"
+				type="Boolean_Type" default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToCustomer" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToDeptHead" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToSalesAgent" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToDataEntryOperator"
+				type="Boolean_Type" default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableRecordPaymentButton" type="Boolean_Type"
+				default="No" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+
+	<xs:complexType name="Claim_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Claim
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ClaimSearch" type="ClaimSearch_Type"
+				minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="RegisterClaim" type="RegisterClaim_Type"
+				minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="ApproveClaim" type="ApproveClaim_Type"
+				minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="AcceptClaim" type="AcceptClaim_Type"
+				minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ClaimSearch_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Claim Search
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="ClaimSearchRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="ApproveClaimSearchRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="ClaimNeedToBeAcceptedRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="ClaimAutoAcceptedRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="RejectedClaimRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="RegisterClaim_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Register Claim
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="EnableClaimWithOutInvoice" type="Boolean_Type"
+				default="No" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableRegisterClaimManagerOveride" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToCustomer" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToDeptHead" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToSalesAgent" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToDataEntryOperator"
+				type="Boolean_Type" default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="ApproveClaim_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Register Claim
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="EnableSendingMailToCustomer" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToDeptHead" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToSalesAgent" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToDataEntryOperator"
+				type="Boolean_Type" default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="AcceptClaim_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Register Claim
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="EnableAutoAcceptClaim" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToCustomer" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToDeptHead" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToSalesAgent" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToDataEntryOperator"
+				type="Boolean_Type" default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+
+	<xs:complexType name="Payment_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Payment
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PaymentSearch" type="PaymentSearch_Type"
+				minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="PaymentMethod" type="PaymentMethod_type"
+				minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="PaymentSearch_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Payment Search
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="PaymentSearchRange" type="DashboardRange_Type"
+				default="CURRENT_QUARTER" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="PaymentMethod_type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Payment Search
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="EnablePaymentMethodCash" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnablePaymentmethodCheque" type="Boolean_Type"
+				default="No" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnablePaymentmethodVoucher" type="Boolean_Type"
+				default="No" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnablePaymentmethodCoupon" type="Boolean_Type"
+				default="No" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToCustomer" type="Boolean_Type"
+				default="No" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToDeptHead" type="Boolean_Type"
+				default="No" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToSalesAgent" type="Boolean_Type"
+				default="No" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="EnableSendingMailToDataEntryOperator"
+				type="Boolean_Type" default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+
+	<xs:complexType name="Customer_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Customer
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="CustomerSearch" type="CustomerSearch_Type"
+				minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="Notification_Type">
+		<xs:annotation>
+			<xs:documentation>
+
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="InventoryNotification" type="InventoryNotification_Type"
+				minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="NewInvoiceNotification" type="NewInvoiceNotification_Type"
+				minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="InventoryNotification_Type">
+		<xs:annotation>
+			<xs:documentation>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="EnableLowInventoryNotification" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="LowInventoryNotificationThreshold" type="IntgerLimit_Type"
+				default="0" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="LowInventoryNotificationEmail" type="Text_Type"
+				default="null" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="NewInvoiceNotification_Type">
+		<xs:annotation>
+			<xs:documentation>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="EnableNewInvoiceNotification" type="Boolean_Type"
+				default="Yes" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="NewInvoiceNotificationRange" type="DashboardRange_Type"
+				default="CURRENT_WEEK" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="CustomerSearch_Type">
+		<xs:annotation>
+			<xs:documentation>
+				Holds all information regarding SDS Customer Search
+				Parameter.
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="CustomerNoOfOpenOrderDisplay" type="IntgerLimit_Type"
+				default="5" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="CustomerNoOfReceiptDisplay" type="IntgerLimit_Type"
+				default="5" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="CustomerNoOfCreditNoteDisplay" type="IntgerLimit_Type"
+				default="5" minOccurs="1" maxOccurs="1"></xs:element>
+			<xs:element name="CustomerNoOfOpenInvoiceDisplay" type="IntgerLimit_Type"
+				default="5" minOccurs="1" maxOccurs="1"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="IntgerLimit_Type">
+		<xs:annotation>
+			<xs:documentation>The Total Percentage (0 - 100)</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:int">
+			<xs:maxInclusive value="100" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="DashboardRange_Type">
+		<xs:annotation>
+			<xs:documentation>SDS DashBoard Parameter Range.Possible Values
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CURRENT_WEEK" />
+			<xs:enumeration value="CURRENT_MONTH" />
+			<xs:enumeration value="CURRENT_QUARTER" />
+			<xs:enumeration value="CURRENT_YEAR" />
+			<xs:enumeration value="NONE" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Boolean_Type">
+		<xs:annotation>
+			<xs:documentation>SDS DashBoard Parameter Range.Possible Values
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Yes" />
+			<xs:enumeration value="No" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="Text_Type">
+		<xs:annotation>
+			<xs:documentation>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

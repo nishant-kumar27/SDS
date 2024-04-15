@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wls:weblogic-ejb-jar
+	xmlns:wls="http://xmlns.oracle.com/weblogic/weblogic-ejb-jar"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_1.xsd http://xmlns.oracle.com/weblogic/weblogic-ejb-jar http://xmlns.oracle.com/weblogic/weblogic-ejb-jar/1.6/weblogic-ejb-jar.xsd">
+	<!--weblogic-version:12.2.1 -->
+	<!-- Let Dime run for 10 minutes(i.e. 10 * 60) without transaction time out -->
+ 	<wls:weblogic-enterprise-bean>
+		<wls:ejb-name>CallDime</wls:ejb-name>
+		<wls:transaction-descriptor>
+			<wls:trans-timeout-seconds>2400</wls:trans-timeout-seconds>
+		</wls:transaction-descriptor>
+	</wls:weblogic-enterprise-bean>
+</wls:weblogic-ejb-jar>

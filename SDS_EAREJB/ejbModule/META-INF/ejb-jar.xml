@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ejb-jar xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_1.xsd"
+	version="3.1">
+	<display-name>SDS</display-name>
+	
+	<enterprise-beans>
+		<session>
+			<ejb-name>SendApproveClaimToWms</ejb-name>
+			<ejb-class>timer.SendApproveClaimToWms</ejb-class>
+			<session-type>Stateless</session-type>
+			<timer>
+				<schedule>
+					<minute>*/50</minute>
+					<hour>*</hour>
+					<day-of-month>*</day-of-month>
+					<month>*</month>
+				</schedule>
+				<timeout-method>
+					<method-name>sendApproveClaimToWms</method-name>
+					<method-params>
+						<method-param>javax.ejb.Timer</method-param>
+					</method-params>
+				</timeout-method>
+			</timer>
+		</session>
+
+		<session>
+			<ejb-name>CallDime</ejb-name>
+			<ejb-class>timer.CallDime</ejb-class>
+			<session-type>Stateless</session-type>
+			<timer>
+				<schedule>
+					<minute>*/5</minute>
+					<hour>*</hour>
+					<day-of-month>*</day-of-month>
+					<month>*</month>
+				</schedule>
+				<timeout-method>
+					<method-name>callDime</method-name>
+					<method-params>
+						<method-param>javax.ejb.Timer</method-param>
+					</method-params>
+				</timeout-method>
+			</timer>
+		</session>
+		
+		<!-- Chiranjibee Comments For Scheduling Cancel Order To rwms -->
+		<session>
+			<ejb-name>SendCancelOrderToWMS</ejb-name>
+			<ejb-class>timer.SendCancelOrderToWMS</ejb-class>
+			<session-type>Stateless</session-type>
+			<timer>
+				<schedule>
+					<minute>*/59</minute>
+					<hour>*</hour>
+					<day-of-month>*</day-of-month>
+					<month>*</month>
+				</schedule>
+				<timeout-method>
+					<method-name>sendCancelOrderToWMS</method-name>
+					<method-params>
+						<method-param>javax.ejb.Timer</method-param>
+					</method-params>
+				</timeout-method>
+			</timer>
+		</session>
+		
+		<session>
+			<ejb-name>GenerateOfflineInvoice</ejb-name>
+			<ejb-class>timer.GenerateOfflineInvoice</ejb-class>
+			<session-type>Stateless</session-type>
+			<timer>
+				<schedule>
+					<minute>*/50</minute>
+					<hour>*</hour>
+					<day-of-month>*</day-of-month>
+					<month>*</month>
+				</schedule>
+				<timeout-method>
+					<method-name>generateOfflineInvoices</method-name>
+					<method-params>
+						<method-param>javax.ejb.Timer</method-param>
+					</method-params>
+				</timeout-method>
+			</timer>
+		</session>
+		
+		<session>
+			<ejb-name>RTLogUtility</ejb-name>
+			<ejb-class>timer.RTLogUtility</ejb-class>
+			<session-type>Stateless</session-type>
+			<timer>
+				<schedule>
+					<minute>*/59</minute>
+					<hour>*</hour>
+					<day-of-month>*</day-of-month>
+					<month>*</month>
+				</schedule>
+				<timeout-method>
+					<method-name>cancelInvalidTrx</method-name>
+					<method-params>
+						<method-param>javax.ejb.Timer</method-param>
+					</method-params>
+				</timeout-method>
+			</timer>
+		</session>
+		
+		<session>
+			<ejb-name>AutoAcceptClaims</ejb-name>
+			<ejb-class>timer.AutoAcceptClaims</ejb-class>
+			<session-type>Stateless</session-type>
+			<timer>
+				<schedule>
+					<minute>*/59</minute>
+					<hour>*</hour>
+					<day-of-month>*</day-of-month>
+					<month>*</month>
+				</schedule>
+				<timeout-method>
+					<method-name>autoAcceptClaims</method-name>
+					<method-params>
+						<method-param>javax.ejb.Timer</method-param>
+					</method-params>
+				</timeout-method>
+			</timer>
+		</session>
+		
+		<session>
+			<ejb-name>SendOrdersToWms</ejb-name>
+			<ejb-class>timer.SendOrdersToWms</ejb-class>
+			<session-type>Stateless</session-type>
+			<timer>
+				<schedule>
+					<minute>*/55</minute>
+					<hour>*</hour>
+					<day-of-month>*</day-of-month>
+					<month>*</month>
+				</schedule>
+				<timeout-method>
+					<method-name>sendOrdersToWms</method-name>
+					<method-params>
+						<method-param>javax.ejb.Timer</method-param>
+					</method-params>
+				</timeout-method>
+			</timer>
+		</session>
+		
+		
+		
+		<!-- <session>
+			<ejb-name>AutoShipPartialOrders</ejb-name>
+			<ejb-class>timer.AutoShipPartialOrders</ejb-class>
+			<session-type>Stateless</session-type>
+			<timer>
+				<schedule>
+					<minute>*/2</minute>
+					<hour>*</hour>
+					<day-of-month>*</day-of-month>
+					<month>*</month>
+				</schedule>
+				<timeout-method>
+					<method-name>autoShipPartialOrders</method-name>
+					<method-params>
+						<method-param>javax.ejb.Timer</method-param>
+					</method-params>
+				</timeout-method>
+			</timer>
+		</session> -->
+		
+		
+		
+	</enterprise-beans>
+	
+	<ejb-client-jar>SDSClient.jar</ejb-client-jar>
+</ejb-jar>

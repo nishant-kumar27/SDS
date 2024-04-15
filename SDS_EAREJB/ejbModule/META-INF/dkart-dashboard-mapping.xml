@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
+	<named-query name="DB_COLLECTION_BY_EMPID">
+		<query>
+			<![CDATA[ Select col from SdsCollectionsDashboard col WHERE col.emId=:empid AND col.id.paymentDate BETWEEN :from AND :to ORDER BY col.id.paymentDate DESC]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="DB_COLLECTION_BY_DIVISION">
+		<query>
+			<![CDATA[ Select col from SdsCollectionsDashboard col WHERE col.divisionId IN :id AND col.id.paymentDate BETWEEN :from AND :to ORDER BY col.id.paymentDate DESC]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="DB_CLAIM_BY_EMPID">
+		<query>
+			<![CDATA[SELECT claim FROM ClaimDetail claim where claim.empId=:empid AND claim.id.claimDate BETWEEN :from AND :to ORDER BY claim.id.claimDate DESC]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="DB_CLAIM_BY_DIVISION">
+		<query>
+			<![CDATA[SELECT claim FROM ClaimDetail claim where claim.divisionId IN :id AND claim.id.claimDate BETWEEN :from AND :to ORDER BY claim.id.claimDate DESC]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="DB_RECEIVABLE_BY_EMPID">
+		<query>
+			<![CDATA[SELECT rd FROM ReceivablesDetail rd INNER JOIN OrderDetailsWithInvoice ord ON rd.orderId=ord.id.orderId and ord.employeeId=:empid and rd.id.invoiceDate between :from and :to ORDER BY rd.id.invoiceDate DESC]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="DB_RECEIVABLE_BY_DIVISION">
+		<query>
+			<![CDATA[SELECT rd FROM ReceivablesDetail rd INNER JOIN OrderDetailsWithInvoice ord ON rd.orderId=ord.id.orderId and ord.divisionId IN :id and rd.id.invoiceDate between :from and :to ORDER BY rd.id.invoiceDate DESC]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="DB_RECEIVABLE_BY_EMPID_AND_STATUS">
+		<query>
+			<![CDATA[SELECT rd FROM ReceivablesDetail rd INNER JOIN OrderDetailsWithInvoice ord ON rd.orderId=ord.id.orderId and ord.employeeId=:empid and rd.id.invoiceDate between :from and :to and rd.invoiceStatus=:status ORDER BY rd.id.invoiceDate DESC]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="DB_RECEIVABLE_BY_DIVISION_AND_STATUS">
+		<query>
+			<![CDATA[SELECT rd FROM ReceivablesDetail rd INNER JOIN OrderDetailsWithInvoice ord ON rd.orderId=ord.id.orderId and ord.divisionId IN :id and rd.id.invoiceDate between :from and :to and rd.invoiceStatus=:status ORDER BY rd.id.invoiceDate DESC]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="DB_ORDERCOUNT_BY_EMPID">
+		<query>
+			<![CDATA[SELECT ord FROM SdsOrdersDashboard ord WHERE ord.id.empId=:id AND ord.id.ordDate BETWEEN :from AND :to]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="DB_ORDERCOUNT_BY_DIVISION">
+		<query>
+		
+			
+			<![CDATA[SELECT ord FROM SdsOrdersDashboard ord WHERE ord.divisionId IN :id AND ord.id.ordDate BETWEEN :from AND :to]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="DB_ORDERDETAIL_BY_EMPID">
+		<query>
+			<![CDATA[SELECT ord FROM OrderDetail ord WHERE ord.empId=:id AND ord.ordTy!=18 AND ord.id.orderDate BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="DB_ORDERDETAIL_BY_DIVISION">
+		<query>
+			<![CDATA[SELECT ord FROM OrderDetail ord WHERE ord.divisionId IN :id AND ord.ordTy!=18 AND ord.id.orderDate BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC]]>
+		</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+</entity-mappings>

@@ -1,0 +1,301 @@
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+    -moz-appearance:textfield;
+}
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #3498db;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite;
+  animation: spin 2s linear infinite;
+  margin:auto;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.fin-data{
+    text-align: right;
+}
+
+.table > tbody > tr > td ,.table-striped > tbody > tr > td{
+        line-height: 1;
+        padding: 4px;
+    
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+        background-color: #e4e4e4;
+}
+
+.table-totals >tbody > tr > td {
+    text-align: right;
+}
+
+.table-totals >tbody > tr > th   {
+    text-align: right;
+}
+
+.input-group-addon{
+        padding:3px;
+    
+}
+
+.sidebar-menu .treeview-menu>li>a {
+        font-size: 13px;
+}
+
+.nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover {
+        color: #fff;
+        background-color:#848484 ;  
+        border-top-color: #565656;
+        border-radius: 3px;
+}
+
+.variance_in_accept{
+        color: blue;
+}
+
+body {
+        font-family: 'Source Sans Pro','Helvetica Neue',Helvetica,Arial,sans-serif;
+        font-weight: 400;
+        overflow-x: hidden;
+        overflow-y: auto;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #333;
+        background-color: #fff;
+    
+}
+
+.form-control {
+
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        display: block;
+        width: 100%;
+        height: 25px;
+        padding: 0px;
+        font-size: 14px;
+    
+}
+
+.form-control-original {
+        padding: 3px;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        display: block;
+        height:30px;; 
+        width: 100%;
+    
+}
+
+.btn {
+        border-radius: 20px;
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.0);
+        margin-top:0px; background:    #3d85c6;
+        background:    -webkit-linear-gradient(#1770c1, #073763 50%, #1770c1);
+        background:    linear-gradient(#1770c1, #073763 50%, #1770c1);  
+        color:         #fff;
+        border: 1px solid;
+        width :100px;
+    
+}
+
+.btn:hover{
+        border-radius: 20px;
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.0);
+        margin-top:0px; background:    #3d85c6;
+        background:    -webkit-linear-gradient(#1770c1, #073763 50%, #1770c1);
+        background:    linear-gradient(#1770c1, #073763 50%, #1770c1);  
+        color:         #fff;
+        border: 1px solid;
+        width :100px;
+}
+
+.btn-primary:hover {
+    background-color: #265a88;
+    background-position: 0 -15px;
+}
+
+.btn-sm {
+	width: 60px;
+}
+
+.btn-sm:HOVER {
+	width: 60px;
+}
+
+.btn-blue {
+        background:    -webkit-linear-gradient(#1770c1, #073763 50%, #1770c1);
+        background:    linear-gradient(#1770c1, #073763 50%, #1770c1);  
+}
+
+.btn-grey{
+        background:    -webkit-linear-gradient(#717171, #262626 20%, #717171);
+        background:    -linear-gradient(#717171, #262626 20%, #717171);
+}
+
+body{
+        font-family: 'Source Sans Pro','Helvetica Neue',Helvetica,Arial,sans-serif;
+    
+}
+
+.sidebar-menu .treeview-menu>li>a {
+   
+        font-size: 13px;
+}
+
+.dropdown-menu>li>a {
+        color: #f5f5f5;
+        background-color: #656a6b;
+}
+
+.customer-header-details{
+    font-size: 16px;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #ffffff;
+}
+
+.table-striped > tbody > tr:nth-of-type(even) {
+  background-color: #dbdbdb;
+}
+
+
+.form-control{
+    padding-left: 5px;
+}
+
+#container {
+        height: 80px;
+        width: 80px;
+        position: relative;
+}
+
+#image {
+        position: absolute;
+        left: -5px;
+        top: -5px;
+        max-width:90px;
+        max-height:90px;
+        width: auto;
+        height: auto;
+}
+
+#text {
+        z-index: 100;
+        position: absolute;
+        color: white;
+        font-size: 30px;
+        font-weight: 900;
+        left: 32px;
+        top: 15px;
+}
+
+.table-border, .table-border>thead>tr>th, .table-border>tbody>tr>th, .table-border>tfoot>tr>th, .table-border>thead>tr>td, .table-border>tbody>tr>td, .table-border>tfoot>tr>td{
+	border: 1px solid #d2d6de	!important;
+}
+
+.order{
+  position: relative;
+  background: #fff;
+  border: 1px solid #f4f4f4;
+  padding: 20px;
+  padding-top: 0px;
+  /* margin: 10px 25px; */
+}
+
+.claim{
+  position: relative;
+  background: #fff;
+  border: 1px solid #f4f4f4;
+  padding: 20px;
+  /* margin: 10px 25px; */
+}
+
+.badge-info {
+  background-color: #1770c1;
+}
+
+hr{
+	border-color: #1770c1;
+}
+
+.p-margin-6{
+	margin: 6px 0px;
+}
+
+.ui-front{
+	z-index: 2000;
+}
+
+.ui-autocomplete-loading {
+	background: white url("../../assets/ajax-loader.gif") right center no-repeat;
+}
+.ui-state-focus {
+	background: #3c8dbc !important;
+	color: white !important;
+}
+
+.table > thead > tr > th {
+    vertical-align: middle;
+}
+
+.badge {
+	animation-name: span-highlight;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes span-highlight {
+	50%  {background-color:#3c8dbc;}
+}
+
+.wrapper{
+	min-width:400px;
+    width: auto !important;
+    width:400px;
+}
+
+.disable_a_href {
+	pointer-events: none; 
+	color: #D3D3D3 !important;
+}
+
+a[disabled], a[disabled]:hover {
+   pointer-events: none;
+}
+
+/* a[disabled] +div, a[disabled]:hover+div {
+   pointer-events: none;
+   background: #e1e1e1!important;
+} */
+
+.label-normal {
+	font-weight: normal;
+}
+
+.padding-left-20 {
+    padding-left: 20px!important;
+}

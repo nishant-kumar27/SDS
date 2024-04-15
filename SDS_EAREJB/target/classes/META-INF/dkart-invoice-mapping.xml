@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
+	<named-query name="SEARCH_ARINV_NUM_ORD_ID_BY_ITEM_ID">
+		<query>
+			<![CDATA[ SELECT r FROM OrdInvQtyShp r  WHERE r.itemId like ?1 ]]>
+		</query>
+	</named-query>
+
+	<named-query name="ALL_INVOICE_NUMBERS_DIVISION">
+		<query>
+			SELECT invoice.arInvNum, custHeader.divisionId from CustomerSiteInvoice invoice, CustomerHeader custHeader
+			WHERE invoice.customerSite.customerSitePK.custId = custHeader.customerHeaderPK.custId AND 
+			invoice.arInvDate >= :arInvDate
+		</query>
+	</named-query>
+	
+	<named-query name="OPEN_INVOICE_NUMBERS">
+		<query>
+			SELECT invoice.arInvNum, custHeader.divisionId from CustomerSiteInvoice invoice, CustomerHeader custHeader
+			WHERE invoice.invStatus = '1' AND
+			invoice.customerSite.customerSitePK.custId = custHeader.customerHeaderPK.custId  AND 
+			invoice.arInvDate >= :arInvDate
+		</query>
+	</named-query>
+	
+	<named-query name="CLOSE_INVOICE_NUMBERS">
+		<query>
+			SELECT invoice.arInvNum, custHeader.divisionId from CustomerSiteInvoice invoice, CustomerHeader custHeader
+			WHERE invoice.invStatus = '0' AND
+			invoice.customerSite.customerSitePK.custId = custHeader.customerHeaderPK.custId  AND 
+			invoice.arInvDate >= :arInvDate
+		</query>
+	</named-query>
+	<named-query name="GET_INVOICE_DETAILS_BY_INVOICEID">
+		<query>
+		SELECT invoice from CustomerSiteInvoice invoice where invoice.arInvNum = :arInvNum
+		</query>
+	</named-query>
+	<named-query name="CHECK_IF_ORDER_DELIVERED">
+		<query>
+		select max(orderHead.scOrd) from OrderTranHeader orderHead join orderHead.ordTranSum orderSum where orderSum.idOrd = :idOrd group by orderSum.idOrd
+		</query>
+	</named-query>
+</entity-mappings>

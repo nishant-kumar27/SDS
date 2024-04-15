@@ -1,0 +1,1720 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings version="2.1"
+	xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd">
+
+	<named-query name="UPD_ORDINV_SHPQTY">
+		<query>
+       		update OrderShipmentDetail detail set detail.rtlogbatch=:rtlogbatch where detail.id.orderId=:orderId
+        </query>
+	</named-query>
+	
+	<named-query name="UPD_PARTIAL_ORD">
+		<query>
+		
+		 select ship.id.orderId from OrderShipmentDetail ship where
+	     	ship.id.orderId in( 		
+        SELECT orderD.ORDERID FROM OrderDetail orderD 
+       	WHERE orderD.ordTy=23 AND orderD.scTran=2 and orderD.scOrd BETWEEN 2 AND 3 and orderD.businessDate BETWEEN :from AND :to        
+        and orderD.ORDERID not in (select ship.id.orderId from OrderShipmentDetail ship where
+	      ship.pickQty is not null and ship.pickQty>0 
+	     	group by ship.id.orderId))and ship.id.shippedQty is not null and ship.id.shippedQty>0 
+	     	group by ship.id.orderId      
+        </query>
+        <hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="INVOICE_SEARCH_ORDER_INVOICE_NUM">
+		<query>
+       SELECT customerInvoice FROM CustomerSiteInvoice customerInvoice
+       WHERE (customerInvoice.invId= :invNum
+       or customerInvoice.arInvNum= :arInvNum)
+        </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="INVOICE_DETAILS_ORDERID">
+		<query>
+     	SELECT tranHeader FROM OrderTranHeader tranHeader
+     	JOIN tranHeader.ordTranSum orderTranSum  
+     	WHERE orderTranSum.idOrd= :orderId AND tranHeader.transactionStatus!=6 ORDER BY tranHeader.scOrd DESC
+   	 </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="INVOICE_DETAILS_ORDERID_INIT">
+		<query>
+     	SELECT tranHeader FROM OrderTranHeader tranHeader
+     	JOIN tranHeader.ordTranSum orderTranSum  
+     	WHERE orderTranSum.idOrd= :orderId
+     	AND tranHeader.ordTy=23
+   	 </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<!-- changed by hanu -->
+	<named-query name="INVOICE_DETAILS_ORDERID_TYPE">
+		<query>
+     	SELECT tranHeader FROM OrderTranHeader tranHeader
+     	JOIN tranHeader.ordTranSum orderTranSum  
+     	WHERE orderTranSum.idOrd= :orderId
+     	AND tranHeader.ordTy=:ordTyp
+     	AND tranHeader.transactionStatus=:tranStatus
+     	AND tranHeader.scOrd=:scOrd
+   	 </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="INVOICE_DETAILS_CUSTID">
+		<query>
+     	SELECT tranHeader FROM OrderTranHeader tranHeader
+     	JOIN tranHeader.ordTranLineItems tranItems
+     	JOIN tranHeader.ordTranSum orderTranSum
+     	WHERE orderTranSum.ordIdCt= :customerId
+   	 </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<named-query name="ORDER_DETAILS_BETWEEN_AMOUNTS">
+		<query>
+     	SELECT tranHeader FROM OrderTranHeader tranHeader
+     	JOIN tranHeader.ordTranSum orderTranSum  
+     	WHERE orderTranSum.dkartNetTot BETWEEN 
+     	:from AND :to ORDER BY orderTranSum.dkartNetTot
+   	 </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="INVOICE_DETAILS_BETWEEN_AMOUNTS">
+		<query>
+     	SELECT customerInvoice FROM CustomerSiteInvoice customerInvoice
+       WHERE customerInvoice.invAmount BETWEEN :from AND :to
+       ORDER BY customerInvoice.invAmount
+   	 </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+
+	<named-query name="INVOICE_SEARCH_BY_INVOICE_DATE_RANGE">
+		<query>
+     	SELECT customerInvoice FROM CustomerSiteInvoice customerInvoice
+       WHERE customerInvoice.arInvDate BETWEEN :from AND :to
+       ORDER BY customerInvoice.arInvDate
+   	 </query>
+	</named-query>
+	
+	<named-query name="INVOICE_SEARCH_BY_ORDER_DATE_RANGE">
+		<query>
+     	SELECT customerInvoice FROM CustomerSiteInvoice customerInvoice
+       	WHERE customerInvoice.orderDate BETWEEN :from AND :to
+       	ORDER BY customerInvoice.orderDate
+   	 </query>
+	</named-query>
+
+	<named-query name="CHECK_FOR_TRANSACTIONS_TO_PROCESS">
+		<query>
+		SELECT header from OrderTranHeader header
+		where header.ordTy=23 AND header.transactionStatus=2
+		AND header.scOrd=0 AND header.idTlogBtch =:constantValue
+		ORDER BY header.ordTranSum.ordEfDate DESC
+   	 </query>
+	</named-query>
+	
+	<!-- Mudassir for select header based on status for delivered orders -->
+	<named-query name="DELIVERED_ORDERS_HEADER_SELECT">
+		<query>
+	SELECT tranHeader.id FROM OrderTranHeader tranHeader
+     	JOIN tranHeader.ordTranSum orderTranSum  
+     	WHERE tranHeader.ordTy=:param1 and tranHeader.scOrd=:param2
+     	union
+     			SELECT tranHeader1.id  FROM OrderTranHeader tranHeader1
+     	JOIN tranHeader1.ordTranSum orderTranSum1  
+     	WHERE  tranHeader1.ordTy=:param3 and tranHeader1.scOrd=:param4
+
+   	 </query>
+	</named-query>
+	
+	
+	<!-- Mudassir for select header based on status for delivered orders -->
+	<named-query name="DELIVERED_ORDERS_HEADER_SELECT_ORD_ID">
+		<query>
+	SELECT orderTranSum.idOrd FROM OrderTranHeader tranHeader
+     	JOIN tranHeader.ordTranSum orderTranSum  
+     	WHERE tranHeader.ordTy=:param1 and tranHeader.scOrd=:param2
+     	union
+     			SELECT orderTranSum1.idOrd FROM OrderTranHeader tranHeader1
+     	JOIN tranHeader1.ordTranSum orderTranSum1  
+     	WHERE  tranHeader1.ordTy=:param3 and tranHeader1.scOrd=:param4
+
+   	 </query>
+	</named-query>
+	<!-- Mudassir for select header based on status for delivered orders -->
+	<named-query name="DELIVERED_ORDERS_HEADER_PK">
+		<query>
+	SELECT tranHeader.id FROM OrderTranHeader tranHeader
+     	JOIN tranHeader.ordTranSum orderTranSum  
+     	WHERE tranHeader.ordTy=:param1 and tranHeader.scOrd=:param2
+     	and orderTranSum.idOrd in (select e.orderNum from CustomerSiteInvoice e)
+     		
+
+   	 </query>
+	</named-query>
+	
+	<!-- Mudassir for update tran header -->
+	<named-query name="DELIVERED_ORDERS_HEADER_UPDATE">
+		<query>
+	update OrderTranHeader head set head.ordTy=:param1,head.scOrd=:param2,head.tsMdfRcrd=:para4,head.deliveryComment=:p5 where head.id.rtStrId=:p1
+and head.id.ordWs=:p2
+and head.id.trnSeq=:p3
+and head.id.dcDyOrd=:p4
+ 
+     		
+
+   	 </query>
+	</named-query>
+	<!-- Changed By @Hanu-->
+	<!-- Mudassir for pending orderr -->
+	<named-query name="PENDING_ORDER_GET">
+		<query>
+	select orderDetail from OrderDetail orderDetail where orderDetail.ordTy=:param1 and orderDetail.scOrd=:param2 and orderDetail.scTran=:param3 ORDER BY orderDetail.id.orderDate DESC
+ 
+     		
+
+   	 </query>
+	</named-query>
+	
+	<!-- Added By @Hanu-->
+	 <named-query name="GET_ORDER_BY_ORDER_ID">
+		<query>
+	SELECT OTH from OrderTranHeader OTH  WHERE OTH.ordTranSum.idOrd = :idOrd and OTH.ordTy =:ordTy and  OTH.scOrd =:scOrd and OTH.transactionStatus=:transactionStatus
+ 
+   	 </query>
+	</named-query>
+		
+	<!-- <named-query name="GET_ORDER_BY_ORDER_ID_bk">
+		<query>
+	SELECT otsum from OrderTranSum otsum  WHERE otsum.idOrd = :idOrd and otsum.ordTranHeader.ordTy =:ordTy and  otsum.ordTranHeader.scOrd =:scOrd and otsum.ordTranHeader.transactionStatus=:transactionStatus
+   	 </query>
+	</named-query> -->
+	<!-- Added by Srinivas for Claims Approval START -->
+	<named-query name="RMV_SUS_TRAN">
+		<query>
+     	DELETE FROM OrderTranHeader orderTranHeader where orderTranHeader.id=:tran and orderTranHeader.transactionStatus=4
+   	 </query>
+	</named-query>
+	
+	<named-query name="RGSTD_CLAIM_DTLS">
+		<query>
+     	SELECT tranHeader FROM OrderTranHeader tranHeader
+     	JOIN tranHeader.ordTranSum orderTranSum  
+     	WHERE orderTranSum.id.rtStrId = tranHeader.id.rtStrId AND 
+     	orderTranSum.id.ordWs = tranHeader.id.ordWs AND
+     	orderTranSum.id.trnSeq = tranHeader.id.trnSeq AND
+     	orderTranSum.id.dcDyOrd = tranHeader.id.dcDyOrd AND
+     	tranHeader.ordTy=2 AND tranHeader.transactionStatus=1 AND
+     	tranHeader.id.rtStrId = :storeId AND 
+     	tranHeader.id.dcDyOrd BETWEEN :from AND :to
+     	
+   	 </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	<!-- Added by Srinivas for Claims Approval END -->
+	
+	<named-query name="QUOTE_SEARCH_WITH_ORDER_ID">
+		<query>
+			SELECT orderTranSum from OrderTranSum orderTranSum WHERE orderTranSum.idOrd = :idOrd
+		</query>
+	</named-query>
+	<!-- Added to search order with LPO Num -->
+	<named-query name="QUOTE_SEARCH_WITH_LPO_NUM">
+		<query>
+			SELECT orderTranSum from OrderTranSum orderTranSum WHERE orderTranSum.custLpoNum = :custLpoNum
+		</query>
+	</named-query>
+	
+	<named-query name="SHIPMENT_DETAILS_BY_ORDERID">
+	<query>
+	 SELECT osd FROM OrderShipmentDetail osd WHERE osd.id.orderId= :orderId AND osd.rtlogbatch='-1' AND osd.id.shippedQty != 0
+	</query>
+	</named-query>
+		
+	<named-query name="SEARCH_ORDER_BY_ORDER_ID">
+	<query>
+	 SELECT orderTranSum FROM OrderTranHeader tranHeader
+     	JOIN tranHeader.ordTranSum orderTranSum  
+     	WHERE orderTranSum.id.rtStrId = tranHeader.id.rtStrId AND 
+     	orderTranSum.id.ordWs = tranHeader.id.ordWs AND
+     	orderTranSum.id.trnSeq = tranHeader.id.trnSeq AND
+     	orderTranSum.id.dcDyOrd = tranHeader.id.dcDyOrd AND
+     	tranHeader.ordTy=23 AND tranHeader.transactionStatus in (2,4)
+     	AND tranHeader.ordTranSum.idOrd = :orderId
+	</query>
+	</named-query>
+	<!-- lokesh edit -->
+	<named-query name="LOOK_UP_CREDIT_MEMO_DETAILS">
+	<query>
+	 SELECT creditMemo FROM RisplDkArCreditMemo creditMemo
+     	WHERE creditMemo.id.crMemoNum = :crMemoNum
+	</query>
+	</named-query>
+	
+	<!-- Added by K.Srinivas for Search Related Task START -->
+	<!-- <named-query name="DTNTRY_ORD_SRCH_ORDID">
+		<query>
+     	SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.id.orderId = :orderid AND ord.divisionId IN :divIds ORDER BY ord.id.orderDate DESC
+   	 </query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	<named-query name="SLSAGNT_ORD_SRCH_ORDID">
+		<query>
+     	SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.employeeId LIKE :empid AND ord.id.orderId = :orderid ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="DIVHD_ORD_SRCH_ORDID">
+		<query>
+     	SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.id.orderId = :orderid AND ord.divisionId IN :divIds ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<!-- Search with Order Totals -->
+	<!-- <named-query name="DTNTRY_ORD_SRCH_ORDTOT1">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.orderTotal >= :from ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	<named-query name="SLSAGNT_ORD_SRCH_ORDTOT1">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.employeeId LIKE :empid AND ord.orderTotal >= :from ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="DIVHD_ORD_SRCH_ORDTOT1">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.orderTotal >= :from ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<!-- <named-query name="DTNTRY_ORD_SRCH_ORDTOT2">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.orderTotal BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	<named-query name="SLSAGNT_ORD_SRCH_ORDTOT2">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.employeeId LIKE :empid AND ord.orderTotal BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="DIVHD_ORD_SRCH_ORDTOT2">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.orderTotal BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<!-- Search with Order Date range -->
+<!-- 	<named-query name="DTNTRY_ORD_SRCH_ORDDT1">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.id.orderDate &lt;= :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	<named-query name="SLSAGNT_ORD_SRCH_ORDDT1">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.employeeId LIKE :empid AND ord.id.orderDate &lt;= :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="DIVHD_ORD_SRCH_ORDDT1">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.id.orderDate &lt;= :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<!-- <named-query name="DTNTRY_ORD_SRCH_ORDDT2">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.id.orderDate BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	<named-query name="SLSAGNT_ORD_SRCH_ORDDT2">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.employeeId LIKE :empid AND ord.id.orderDate BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="DIVHD_ORD_SRCH_ORDDT2">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.id.orderDate BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<!-- Order Search with Invoice Details -->
+	
+	<!-- <named-query name="DTNTRY_ORD_SRCH_INVTOT1">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.invoiceAmount &gt;= :from ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	<named-query name="SLSAGNT_ORD_SRCH_INVTOT1">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.employeeId LIKE :empid AND ord.invoiceAmount &gt;= :from ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="DIVHD_ORD_SRCH_INVTOT1">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.invoiceAmount &gt;= :from ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<!-- <named-query name="DTNTRY_ORD_SRCH_INVTOT2">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.invoiceAmount BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	<named-query name="SLSAGNT_ORD_SRCH_INVTOT2">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.employeeId LIKE :empid AND ord.invoiceAmount BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="DIVHD_ORD_SRCH_INVTOT2">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.invoiceAmount BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<!-- Order Search with Invoice ID -->
+	<!-- <named-query name="DTNTRY_ORD_SRCH_INVID">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.invoiceId = :invoiceid ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	<named-query name="SLSAGNT_ORD_SRCH_INVID">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.employeeId LIKE :empid AND ord.invoiceId = :invoiceid ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="DIVHD_ORD_SRCH_INVID">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.invoiceId = :invoiceid ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<!-- Order Search with Invoice Date Range -->
+	<!-- <named-query name="DTNTRY_ORD_SRCH_INVDT1">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.invoiceDate &lt;= :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	<named-query name="SLSAGNT_ORD_SRCH_INVDT1">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.employeeId LIKE :empid AND ord.invoiceDate &lt;= :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="DIVHD_ORD_SRCH_INVDT1">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.invoiceDate &lt;= :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+<!-- 	<named-query name="DTNTRY_ORD_SRCH_INVDT2">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.invoiceDate BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	<named-query name="SLSAGNT_ORD_SRCH_INVDT2">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.employeeId LIKE :empid AND ord.invoiceDate BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="DIVHD_ORD_SRCH_INVDT2">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND ord.invoiceDate BETWEEN :from AND :to ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<!-- Order Search with Customer data -->
+<!-- 	<named-query name="DTNTRY_ORD_SRCH_CUST">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND (ord.custId LIKE :customer OR upper(ord.customerName) LIKE :customer) ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	<named-query name="SLSAGNT_ORD_SRCH_CUST">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.employeeId LIKE :empid AND (ord.custId LIKE :customer OR upper(ord.customerName) LIKE :customer) ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="DIVHD_ORD_SRCH_CUST">
+		<query>
+		SELECT ord FROM OrderDetailsWithInvoice ord WHERE ord.divisionId IN :divIds AND (ord.custId LIKE :customer OR upper(ord.customerName) LIKE :customer) ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<!-- <named-query name="DTNTRY_ORD_SRCH_ITMINFO">
+		<query>
+		SELECT ord from OrderDetailsWithInvoice ord WHERE ord.id.orderId IN (SELECT ots.idOrd FROM  OrderTranLineItem otli INNER JOIN  OrderTranSum ots ON otli.id.trnSeq=ots.id.trnSeq AND otli.id.rtStrId=ots.id.rtStrId AND otli.id.dcDyOrd=ots.id.dcDyOrd AND (otli.itemId LIKE :itemid OR upper(otli.deItmShrtRcpt) LIKE :itemid)  ) AND ord.divisionId IN :divIds ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	<named-query name="SLSAGNT_ORD_SRCH_ITMINFO">
+		<query>
+		SELECT ord from OrderDetailsWithInvoice ord WHERE ord.id.orderId IN (SELECT ots.idOrd FROM  OrderTranLineItem otli INNER JOIN  OrderTranSum ots ON otli.id.trnSeq=ots.id.trnSeq AND otli.id.rtStrId=ots.id.rtStrId AND otli.id.dcDyOrd=ots.id.dcDyOrd AND (otli.itemId LIKE :itemid OR upper(otli.deItmShrtRcpt) LIKE :itemid)  ) AND ord.employeeId LIKE :empid ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	<named-query name="DIVHD_ORD_SRCH_ITMINFO">
+		<query>
+		SELECT ord from OrderDetailsWithInvoice ord WHERE ord.id.orderId IN (SELECT ots.idOrd FROM  OrderTranLineItem otli INNER JOIN  OrderTranSum ots ON otli.id.trnSeq=ots.id.trnSeq AND otli.id.rtStrId=ots.id.rtStrId AND otli.id.dcDyOrd=ots.id.dcDyOrd AND (otli.itemId LIKE :itemid OR upper(otli.deItmShrtRcpt) LIKE :itemid)  ) AND ord.divisionId IN :divIds ORDER BY ord.id.orderDate DESC
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query>
+	
+	
+	<!-- Added by K.Srinivas for Search Related Task END -->
+	<!-- Mudassir Delivered Order Search role based START -->
+
+	<named-query name="DELV_ORD_ITEM_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     =:ord_type
+AND ord.scOrd       =:sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.invoiceId  IS NOT NULL
+AND ord.id.orderId IN
+  (SELECT ots.idOrd
+  FROM OrderTranLineItem otli
+  INNER JOIN OrderTranSum ots
+  ON otli.id.trnSeq  =ots.id.trnSeq
+  AND otli.id.rtStrId=ots.id.rtStrId
+  AND otli.id.dcDyOrd=ots.id.dcDyOrd
+  AND (otli.itemId LIKE :itemid
+  OR upper(otli.deItmShrtRcpt) LIKE :itemiddes)
+  )
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+<!-- Commented by Jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC )
+ and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in (select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy     =:ord_type1
+AND ord1.scOrd       =:sc_ord1
+AND ord1.scTran      =:sc_tran1
+AND ord1.invoiceId  IS NOT NULL
+AND ord1.id.orderId IN
+  (SELECT ots.idOrd
+  FROM OrderTranLineItem otli
+  INNER JOIN OrderTranSum ots
+  ON otli.id.trnSeq  =ots.id.trnSeq
+  AND otli.id.rtStrId=ots.id.rtStrId
+  AND otli.id.dcDyOrd=ots.id.dcDyOrd
+  AND (otli.itemId LIKE :itemid
+  OR upper(otli.deItmShrtRcpt) LIKE :itemiddes )
+  )
+AND ord1.divisionId IN :division_list1 and  ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+
+   	 </query>
+	</named-query>
+
+	<named-query name="DELV_ORD_CUST_DIV_HEAD">
+		<query>
+	
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    =:ord_type
+AND ord.scOrd      =:sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.invoiceId IS NOT NULL
+AND (ord.custId LIKE :customer
+OR upper(ord.customerName) LIKE :customerdes)
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC) 
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy    =:ord_type1
+AND ord1.scOrd      =:sc_ord1
+AND ord1.scTran     =:sc_tran1
+AND ord1.invoiceId IS NOT NULL
+AND (ord1.custId LIKE :customer
+OR upper(ord1.customerName) LIKE :customerdes)
+AND ord1.divisionId IN :division_list1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_ITEM_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     =:ord_type
+AND ord.scOrd       =:sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.invoiceId  IS NOT NULL
+AND ord.id.orderId IN
+  (SELECT ots.idOrd
+  FROM OrderTranLineItem otli
+  INNER JOIN OrderTranSum ots
+  ON otli.id.trnSeq  =ots.id.trnSeq
+  AND otli.id.rtStrId=ots.id.rtStrId
+  AND otli.id.dcDyOrd=ots.id.dcDyOrd
+  AND (otli.itemId LIKE :itemid
+  OR upper(otli.deItmShrtRcpt) LIKE :itemiddes)
+  )
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC )
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy     =:ord_type1
+AND ord1.scOrd       =:sc_ord1
+AND ord1.scTran      =:sc_tran1
+AND ord1.invoiceId  IS NOT NULL
+AND ord1.id.orderId IN
+  (SELECT ots.idOrd
+  FROM OrderTranLineItem otli
+  INNER JOIN OrderTranSum ots
+  ON otli.id.trnSeq  =ots.id.trnSeq
+  AND otli.id.rtStrId=ots.id.rtStrId
+  AND otli.id.dcDyOrd=ots.id.dcDyOrd
+  AND (otli.itemId LIKE :itemid
+  OR upper(otli.deItmShrtRcpt) LIKE :itemiddes)
+  )
+AND ord1.employeeId Like :employee_num1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 	</query>
+
+	</named-query>
+	<named-query name="DELV_ORD_CUST_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    =:ord_type
+AND ord.scOrd      =:sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.invoiceId IS NOT NULL
+AND (ord.custId LIKE :customer
+OR upper(ord.customerName) LIKE :customerdes)
+AND ord.employeeId Like :employee_num ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC )
+ and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy    =:ord_type1
+AND ord1.scOrd      =:sc_ord1
+AND ord1.scTran     =:sc_tran1
+AND ord1.invoiceId IS NOT NULL
+AND (ord1.custId LIKE :customer
+OR upper(ord1.customerName) LIKE :customerdes)
+AND ord1.employeeId Like :employee_num1  and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 	
+ -->	</query>
+	</named-query>
+	<named-query name="DELV_ORD_ORD_ID_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+where ord.ordTy     =:ord_type
+AND ord.scOrd       =:sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.invoiceId  IS NOT NULL
+AND ord.id.orderId  =:orderid
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC ) 
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+where  ord1.ordTy     =:ord_type1
+AND ord1.scOrd       =:sc_ord1
+AND ord1.scTran      =:sc_tran1
+AND ord1.invoiceId  IS NOT NULL
+AND ord1.id.orderId  =:orderid1
+AND ord1.divisionId IN :division_list1
+and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_FROM_TO_DATE_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    =:ord_type
+AND ord.scOrd      =:sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.invoiceId IS NOT NULL
+AND ord.orderDate BETWEEN :from AND :to
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC ) 
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy    =:ord_type1
+AND ord1.scOrd      =:sc_ord1
+AND ord1.scTran     =:sc_tran1
+AND ord1.invoiceId IS NOT NULL
+AND ord1.orderDate BETWEEN :from1 AND :to1
+AND ord1.divisionId IN :division_list1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_FROM_DATE_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     =:ord_type
+AND ord.scOrd       =:sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.invoiceId  IS NOT NULL
+AND ord.orderDate  &gt;=:from
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC ) 
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy     =:ord_type1
+AND ord1.scOrd       =:sc_ord1
+AND ord1.scTran      =:sc_tran1
+AND ord1.invoiceId  IS NOT NULL
+AND ord1.orderDate  &gt;=:from1
+AND ord1.divisionId IN :division_list1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_TO_DATE_DIV_HEAD">
+		<query>
+SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     =:ord_type
+AND ord.scOrd       =:sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.invoiceId  IS NOT NULL
+AND ord.orderDate  &lt;=:to
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC ) 
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy     =:ord_type1
+AND ord1.scOrd       =:sc_ord1
+AND ord1.scTran      =:sc_tran1
+AND ord1.invoiceId  IS NOT NULL
+AND ord1.orderDate  &lt;=:to1
+AND ord1.divisionId IN :division_list1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_FROM_TO_TOTAL_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    =:ord_type
+AND ord.scOrd      =:sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.invoiceId IS NOT NULL
+AND ord.orderTotal BETWEEN :from AND :to
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC )
+ and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy    =:ord_type1
+AND ord1.scOrd      =:sc_ord1
+AND ord1.scTran     =:sc_tran1
+AND ord1.invoiceId IS NOT NULL
+AND ord1.orderTotal BETWEEN :from1 AND :to1
+AND ord1.divisionId IN :division_list1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_FROM_TOTAL_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     =:ord_type
+AND ord.scOrd       =:sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.invoiceId  IS NOT NULL
+AND ord.orderTotal &gt;=:from
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC ) 
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy     =:ord_type1
+AND ord1.scOrd       =:sc_ord1
+AND ord1.scTran      =:sc_tran1
+AND ord1.invoiceId  IS NOT NULL
+AND ord1.orderTotal &gt;=:from1
+AND ord1.divisionId IN :division_list1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_TO_TOTAL_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     =:ord_type
+AND ord.scOrd       =:sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.invoiceId  IS NOT NULL
+AND ord.orderTotal &lt;=:to
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC )
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy     =:ord_type1
+AND ord1.scOrd       =:sc_ord1
+AND ord1.scTran      =:sc_tran1
+AND ord1.invoiceId  IS NOT NULL
+AND ord1.orderTotal &lt;=:to1
+AND ord1.divisionId IN :division_list1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_ORD_ID_EMP">
+
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    =:ord_type
+AND ord.scOrd      =:sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.invoiceId IS NOT NULL
+AND ord.id.orderId =:orderid
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC ) 
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy    =:ord_type1
+AND ord1.scOrd      =:sc_ord1
+AND ord1.scTran     =:sc_tran1
+AND ord1.invoiceId IS NOT NULL
+AND ord1.id.orderId =:orderid1
+AND ord1.employeeId LIKE :employee_num1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_FROM_TO_DATES_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    =:ord_type
+AND ord.scOrd      =:sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.invoiceId IS NOT NULL
+AND ord.orderDate BETWEEN :from AND :to
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC ) 
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy    =:ord_type1
+AND ord1.scOrd      =:sc_ord1
+AND ord1.scTran     =:sc_tran1
+AND ord1.invoiceId IS NOT NULL
+AND ord1.orderDate BETWEEN :from1 AND :to1
+AND ord1.employeeId LIKE :employee_num1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_FROM_DATE_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    =:ord_type
+AND ord.scOrd      =:sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.invoiceId IS NOT NULL
+AND ord.orderDate &gt;=:from 
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC ) 
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy    =:ord_type1
+AND ord1.scOrd      =:sc_ord1
+AND ord1.scTran     =:sc_tran1
+AND ord1.invoiceId IS NOT NULL
+AND ord1.orderDate &gt;=:from1
+AND ord1.employeeId LIKE :employee_num1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_TO_DATE_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    =:ord_type
+AND ord.scOrd      =:sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.invoiceId IS NOT NULL
+AND ord.orderDate &lt;=:to
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC )
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy    =:ord_type1
+AND ord1.scOrd      =:sc_ord1
+AND ord1.scTran     =:sc_tran1
+AND ord1.invoiceId IS NOT NULL
+AND ord1.orderDate &lt;=:to1
+AND ord1.employeeId LIKE :employee_num1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_FOM_TO_TOTALS_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    =:ord_type
+AND ord.scOrd      =:sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.invoiceId IS NOT NULL
+AND ord.orderTotal BETWEEN :from AND :to
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC )
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy    =:ord_type1
+AND ord1.scOrd      =:sc_ord1
+AND ord1.scTran     =:sc_tran1
+AND ord1.invoiceId IS NOT NULL
+AND ord1.orderTotal BETWEEN :from1 AND :to1
+AND ord1.employeeId LIKE :employee_num1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_FOM_TOTALS_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     =:ord_type
+AND ord.scOrd       =:sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.invoiceId  IS NOT NULL
+AND ord.orderTotal &gt;=:from
+AND ord.employeeId  LIKE :employee_num ORDER BY ord.id.orderDate DESC
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC )
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy    =:ord_type1
+AND ord1.scOrd      =:sc_ord1
+AND ord1.scTran     =:sc_tran1
+AND ord1.invoiceId IS NOT NULL
+AND ord1.orderTotal &gt;=:from1
+AND ord1.employeeId LIKE :employee_num1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y'))  -->
+	</query>
+	</named-query>
+	<named-query name="DELV_ORD_TO_TOTALS_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     =:ord_type
+AND ord.scOrd       =:sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.invoiceId  IS NOT NULL
+AND ord.orderTotal &lt;=:to
+AND ord.employeeId  LIKE :employee_num ORDER BY ord.id.orderDate DESC 
+<!-- Commented by jagadish reason being to support this code ( ORDER BY ord.id.orderDate DESC )
+and ord.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) 
+UNION
+SELECT ord1
+FROM OrderDetailsWithInvoice ord1
+WHERE ord1.ordTy    =:ord_type1
+AND ord1.scOrd      =:sc_ord1
+AND ord1.scTran     =:sc_tran1
+AND ord1.invoiceId IS NOT NULL
+AND ord1.orderTotal &lt;=:to1
+AND ord1.employeeId LIKE :employee_num1 and ord1.id.orderId not in (select csum.idOrd from ClaimTranSum csum where csum.idOrd is not null and csum.id.trnSeq in 
+(select ch.id.trnSeq from ClaimTranHeader ch where ch.flInvCncl='Y')) --> 
+	</query>
+	</named-query>
+	<!-- Mudassir Delivered Order Search role based END -->
+	
+	
+	<!-- Mudassir Open Order search Start -->
+	<named-query name="OPEN_ORD_ORD_ID_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     IN :ord_type
+AND ord.scOrd       IN :sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.id.orderId  =:orderid
+AND ord.divisionId IN :division_list  ORDER BY ord.id.orderDate DESC
+	</query>
+	</named-query>
+	
+		<named-query name="OPEN_ORD_ID_DIV_HEAD_FOR_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3) 
+AND ord.scTran=2
+AND ord.id.orderId  =:orderid
+AND ord.divisionId IN :division_list  ORDER BY ord.id.orderDate DESC
+	</query>
+	</named-query>
+	
+	<named-query name="OPEN_ORD_FROM_TO_DATE_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    IN :ord_type
+AND ord.scOrd      IN :sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.orderDate BETWEEN :from AND :to
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+	</query>
+	</named-query>
+	
+	
+	<named-query name="OPEN_ORD_FROM_TO_DATE_DIV_HEAD_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3) 
+AND ord.scTran=2
+AND ord.orderDate BETWEEN :from AND :to
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+	</query>
+	</named-query>
+	
+		<named-query name="OPEN_ORD_FROM_DATE_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     IN :ord_type
+AND ord.scOrd       IN :sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.orderDate  &gt;=:from
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+		<named-query name="OPEN_ORD_FROM_DATE_DIV_HEAD_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3) 
+AND ord.scTran=2
+AND ord.orderDate  &gt;=:from
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+	
+		<named-query name="OPEN_ORD_TO_DATE_DIV_HEAD">
+		<query>
+SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     IN :ord_type
+AND ord.scOrd       IN :sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.orderDate  &lt;=:to
+AND ord.divisionId IN :division_list  ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+	
+		<named-query name="OPEN_ORD_TO_DATE_DIV_HEAD_IN_PROGRESS">
+		<query>
+SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3) 
+AND ord.scTran=2
+AND ord.orderDate  &lt;=:to
+AND ord.divisionId IN :division_list  ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+	
+		<named-query name="OPEN_ORD_FROM_TO_TOTAL_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    IN :ord_type
+AND ord.scOrd      IN :sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.orderTotal BETWEEN :from AND :to
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+	<named-query name="OPEN_ORD_FROM_TO_TOTAL_DIV_HEAD_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND ord.scTran=2
+AND ord.orderTotal BETWEEN :from AND :to
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+		<named-query name="OPEN_ORD_FROM_TOTAL_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     IN :ord_type
+AND ord.scOrd       IN :sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.orderTotal &gt;=:from
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+	</query>
+	</named-query>
+	<named-query name="OPEN_ORD_FROM_TOTAL_DIV_HEAD_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND ord.scTran=2
+AND ord.orderTotal &gt;=:from
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+	</query>
+	</named-query>
+	
+		<named-query name="OPEN_ORD_TO_TOTAL_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     IN :ord_type
+AND ord.scOrd       IN :sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.orderTotal &lt;=:to
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+	<named-query name="OPEN_ORD_TO_TOTAL_DIV_HEAD_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND ord.scTran=2
+AND ord.orderTotal &lt;=:to
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+		<named-query name="OPEN_ORD_ORD_ID_EMP">
+
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    IN :ord_type
+AND ord.scOrd      IN :sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.id.orderId =:orderid
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+		<named-query name="OPEN_ORD_ORD_ID_EMP_IN_PROGRESS">
+
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND ord.scTran=2
+AND ord.id.orderId =:orderid
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+		<named-query name="OPEN_ORD_FROM_TO_DATES_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    IN :ord_type
+AND ord.scOrd      IN :sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.orderDate BETWEEN :from AND :to
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+		<named-query name="OPEN_ORD_FROM_TO_DATES_EMP_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND ord.scTran=2
+AND ord.orderDate BETWEEN :from AND :to
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+	
+		<named-query name="OPEN_ORD_FROM_DATE_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    IN :ord_type
+AND ord.scOrd      IN :sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.orderDate &gt;=:from
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+		<named-query name="OPEN_ORD_FROM_DATE_EMP_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND ord.scTran=2
+AND ord.orderDate &gt;=:from
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+	
+		<named-query name="OPEN_ORD_TO_DATE_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    IN :ord_type
+AND ord.scOrd      IN :sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.orderDate &lt;=:to
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+		<named-query name="OPEN_ORD_TO_DATE_EMP_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND ord.scTran=2
+AND ord.orderDate &lt;=:to
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+		<named-query name="OPEN_ORD_FOM_TO_TOTALS_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    IN :ord_type
+AND ord.scOrd      IN :sc_ord
+AND ord.scTran     =:sc_tran
+AND ord.orderTotal BETWEEN :from AND :to
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+	
+		<named-query name="OPEN_ORD_FOM_TO_TOTALS_EMP_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND ord.scTran=2
+AND ord.orderTotal BETWEEN :from AND :to
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+	
+		<named-query name="OPEN_ORD_FOM_TOTALS_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     IN :ord_type
+AND ord.scOrd       IN :sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.orderTotal &gt;=:from
+AND ord.employeeId  LIKE :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+		<named-query name="OPEN_ORD_FOM_TOTALS_EMP_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND ord.scTran=2
+AND ord.orderTotal &gt;=:from
+AND ord.employeeId  LIKE :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+	
+		<named-query name="OPEN_ORD_TO_TOTALS_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     IN :ord_type
+AND ord.scOrd       IN :sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.orderTotal &lt;=:to
+AND ord.employeeId  LIKE :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+	<named-query name="OPEN_ORD_TO_TOTALS_EMP_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND ord.scTran=2
+AND ord.orderTotal &lt;=:to
+AND ord.employeeId  LIKE :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+	</named-query>
+	<named-query name="OPEN_ORD_ITEM_DIV_HEAD">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     IN :ord_type
+AND ord.scOrd       IN :sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.id.orderId IN
+  (SELECT ots.idOrd
+  FROM OrderTranLineItem otli
+  INNER JOIN OrderTranSum ots
+  ON otli.id.trnSeq  =ots.id.trnSeq
+  AND otli.id.rtStrId=ots.id.rtStrId
+  AND otli.id.dcDyOrd=ots.id.dcDyOrd
+  AND (otli.itemId LIKE :itemid
+  OR upper(otli.deItmShrtRcpt) LIKE :itemiddes)
+  )
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+
+
+   	 </query>
+	</named-query>	
+	
+	<named-query name="OPEN_ORD_ITEM_DIV_HEAD_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND ord.scTran=2
+AND ord.id.orderId IN
+  (SELECT ots.idOrd
+  FROM OrderTranLineItem otli
+  INNER JOIN OrderTranSum ots
+  ON otli.id.trnSeq  =ots.id.trnSeq
+  AND otli.id.rtStrId=ots.id.rtStrId
+  AND otli.id.dcDyOrd=ots.id.dcDyOrd
+  AND (otli.itemId LIKE :itemid
+  OR upper(otli.deItmShrtRcpt) LIKE :itemiddes)
+  )
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+
+
+   	 </query>
+	</named-query>	
+	
+	<named-query name="OPEN_ORD_CUST_DIV_HEAD">
+		<query>
+	
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    IN :ord_type
+AND ord.scOrd      IN :sc_ord
+AND (ord.custId LIKE :customer
+OR upper(ord.customerName) LIKE :customerdes)
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+ 
+	
+	</query>
+	</named-query>
+	<named-query name="OPEN_ORD_CUST_DIV_HEAD_IN_PROGRESS">
+		<query>
+	
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND (ord.custId LIKE :customer
+OR upper(ord.customerName) LIKE :customerdes)
+AND ord.divisionId IN :division_list ORDER BY ord.id.orderDate DESC
+
+	
+	</query>
+	</named-query>
+	<named-query name="OPEN_ORD_ITEM_EMP">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy     IN :ord_type
+AND ord.scOrd       IN :sc_ord
+AND ord.scTran      =:sc_tran
+AND ord.id.orderId IN
+  (SELECT ots.idOrd
+  FROM OrderTranLineItem otli
+  INNER JOIN OrderTranSum ots
+  ON otli.id.trnSeq  =ots.id.trnSeq
+  AND otli.id.rtStrId=ots.id.rtStrId
+  AND otli.id.dcDyOrd=ots.id.dcDyOrd
+  AND (otli.itemId LIKE :itemid
+  OR upper(otli.deItmShrtRcpt) LIKE :itemiddes)
+  )
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+
+	</named-query>
+	<named-query name="OPEN_ORD_ITEM_EMP_IN_PROGRESS">
+		<query>
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND ord.scTran=2
+AND ord.id.orderId IN
+  (SELECT ots.idOrd
+  FROM OrderTranLineItem otli
+  INNER JOIN OrderTranSum ots
+  ON otli.id.trnSeq  =ots.id.trnSeq
+  AND otli.id.rtStrId=ots.id.rtStrId
+  AND otli.id.dcDyOrd=ots.id.dcDyOrd
+  AND (otli.itemId LIKE :itemid
+  OR upper(otli.deItmShrtRcpt) LIKE :itemiddes)
+  ) 
+AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	</query>
+
+	</named-query>
+	
+	
+	<named-query name="OPEN_ORD_CUST_EMP">
+		<query>
+	
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE ord.ordTy    IN :ord_type
+AND ord.scOrd      IN :sc_ord
+AND (ord.custId LIKE :customer
+OR upper(ord.customerName) LIKE :customerdes)
+ AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC 
+ 
+	
+	</query>
+	</named-query>
+	<named-query name="OPEN_ORD_CUST_EMP_IN_PROGRESS">
+		<query>
+	
+	SELECT ord
+FROM OrderDetailsWithInvoice ord
+WHERE (ord.ordTy=23)
+AND (ord.scOrd BETWEEN 2 AND 3)
+AND (ord.custId LIKE :customer
+OR upper(ord.customerName) LIKE :customerdes)
+ AND ord.employeeId like :employee_num ORDER BY ord.id.orderDate DESC
+
+	
+	</query>
+	</named-query>
+	
+	
+	<!-- Mudassir Open Orders Search End -->
+	
+	<!-- added by srinivas reddy G Start -->
+	<!-- <named-query name="CUST_HEADER_FROM_DIVISION">
+		<query>
+		SELECT customer from CustomerHeader customer WHERE customer.divisionId IN :divIds 
+   	 	</query>
+		<hint name="eclipselink.read-only" value="true" />
+	</named-query> -->
+	
+	
+	<!-- added by Srinivas Reddy G to get the returned orders -->
+	<!-- returned order search query for all -->
+	 <named-query name="RETURN_ORD_SEARCH_FOR_ALL">
+		<query>
+		select OTS.idOrd,OTS.id.dcDyOrd,OTS.ordIdCt,OTS.dkartNetTot,CUST.ctNm,MSTR.empNme,OTH.returnReasonCode,OTH.emId,OTS.origOrderId,OTH.acceptClaimId FROM OrderTranHeader OTH,OrderTranSum OTS,RisplDkEmpMstr MSTR,CustomerHeader CUST WHERE OTS.idOrd IN 
+(SELECT ots.idOrd FROM OrderTranSum ots,OrderTranHeader oth WHERE ots.origOrderId IN
+(select ots.idOrd from OrderTranSum ots,OrderTranHeader oth where ots.idOrd like :orderId and ots.dkartNetTot between :fromTotal and :toTotal and ots.id.dcDyOrd between :fromDate and :toDate and ots.ordIdCt in(select CUST.customerHeaderPK.custId from CustomerHeader CUST where CUST.customerHeaderPK.custId like :customer or upper(CUST.ctNm) like :customer) and ots.idOrd in (select distinct ots.idOrd from OrderTranSum ots,OrderTranLineItem otli where ots.id.rtStrId=otli.id.rtStrId and ots.id.dcDyOrd = otli.id.dcDyOrd and ots.id.trnSeq = otli.id.trnSeq and ots.id.ordWs = otli.id.ordWs and (otli.itemId like :itemid or upper(otli.deItmShrtRcpt) like :itemid)) AND OTH.id.rtStrId=OTS.id.rtStrId
+AND OTH.id.ordWs = OTS.id.ordWs
+AND OTH.id.trnSeq = OTS.id.trnSeq
+AND oth.id.dcDyOrd = ots.id.dcDyOrd)
+AND OTH.id.rtStrId=OTS.id.rtStrId
+AND OTH.id.ordWs = OTS.id.ordWs
+AND OTH.id.trnSeq = OTS.id.trnSeq
+AND oth.id.dcDyOrd = ots.id.dcDyOrd)
+AND OTH.id.rtStrId=OTS.id.rtStrId
+AND OTH.id.ordWs = OTS.id.ordWs
+AND OTH.id.trnSeq = OTS.id.trnSeq
+AND oth.id.dcDyOrd = ots.id.dcDyOrd
+AND OTS.ordIdCt = CUST.customerHeaderPK.custId
+AND OTH.emId = MSTR.id.empId ORDER BY OTS.id.dcDyOrd DESC
+		</query>
+	</named-query>
+	
+<!-- returned order search query for within division -->	
+ <named-query name="RETURN_ORD_SEARCH_FOR_WITH_IN_DIVISION">
+		<query>
+		select OTS.idOrd,OTS.id.dcDyOrd,OTS.ordIdCt,OTS.dkartNetTot,CUST.ctNm,MSTR.empNme,OTH.returnReasonCode,OTH.emId,OTS.origOrderId,OTH.acceptClaimId FROM OrderTranHeader OTH,OrderTranSum OTS,RisplDkEmpMstr MSTR,CustomerHeader CUST WHERE OTS.idOrd IN 
+(SELECT ots.idOrd FROM OrderTranSum ots,OrderTranHeader oth WHERE ots.origOrderId IN
+(select ots.idOrd from OrderTranSum ots,OrderTranHeader oth where ots.idOrd like :orderId and ots.dkartNetTot between :fromTotal and :toTotal and ots.id.dcDyOrd between :fromDate and :toDate and ots.ordIdCt in(select CUST.customerHeaderPK.custId from CustomerHeader CUST where  CUST.divisionId in :divIds and (CUST.customerHeaderPK.custId like :customer or upper(CUST.ctNm) like :customer)) and ots.idOrd in (select distinct ots.idOrd from OrderTranSum ots,OrderTranLineItem otli where ots.id.rtStrId=otli.id.rtStrId and ots.id.dcDyOrd = otli.id.dcDyOrd and ots.id.trnSeq = otli.id.trnSeq and ots.id.ordWs = otli.id.ordWs and (otli.itemId like :itemid or upper(otli.deItmShrtRcpt) like :itemid)) AND OTH.id.rtStrId=OTS.id.rtStrId
+AND OTH.id.ordWs = OTS.id.ordWs
+AND OTH.id.trnSeq = OTS.id.trnSeq
+AND oth.id.dcDyOrd = ots.id.dcDyOrd)
+AND OTH.id.rtStrId=OTS.id.rtStrId
+AND OTH.id.ordWs = OTS.id.ordWs
+AND OTH.id.trnSeq = OTS.id.trnSeq
+AND oth.id.dcDyOrd = ots.id.dcDyOrd)
+AND OTH.id.rtStrId=OTS.id.rtStrId
+AND OTH.id.ordWs = OTS.id.ordWs
+AND OTH.id.trnSeq = OTS.id.trnSeq
+AND oth.id.dcDyOrd = ots.id.dcDyOrd
+AND OTS.ordIdCt = CUST.customerHeaderPK.custId
+AND OTH.emId = MSTR.id.empId ORDER BY OTS.id.dcDyOrd DESC
+		</query>
+	</named-query>
+<!-- returned order search query for SalesAgent -->	
+ <named-query name="RETURN_ORD_SEARCH_FOR_SalesAgent">
+		<query>
+		select OTS.idOrd,OTS.id.dcDyOrd,OTS.ordIdCt,OTS.dkartNetTot,CUST.ctNm,MSTR.empNme,OTH.returnReasonCode,OTH.emId,OTS.origOrderId,OTH.acceptClaimId FROM OrderTranHeader OTH,OrderTranSum OTS,RisplDkEmpMstr MSTR,CustomerHeader CUST WHERE OTS.idOrd IN 
+(SELECT ots.idOrd FROM OrderTranSum ots,OrderTranHeader oth WHERE ots.origOrderId IN
+(select ots.idOrd from OrderTranSum ots,OrderTranHeader oth where ots.idOrd like :orderId and ots.dkartNetTot between :fromTotal and :toTotal and ots.id.dcDyOrd between :fromDate and :toDate and ots.ordIdCt in(select CUST.customerHeaderPK.custId from CustomerHeader CUST where CUST.customerHeaderPK.custId like :customer or upper(CUST.ctNm) like :customer) and ots.idOrd in (select distinct ots.idOrd from OrderTranSum ots,OrderTranLineItem otli where ots.id.rtStrId=otli.id.rtStrId and ots.id.dcDyOrd = otli.id.dcDyOrd and ots.id.trnSeq = otli.id.trnSeq and ots.id.ordWs = otli.id.ordWs and (otli.itemId like :itemid or upper(otli.deItmShrtRcpt) like :itemid))
+AND oth.emId=:salesAgent
+AND OTH.id.rtStrId=OTS.id.rtStrId
+AND OTH.id.ordWs = OTS.id.ordWs
+AND OTH.id.trnSeq = OTS.id.trnSeq
+AND oth.id.dcDyOrd = ots.id.dcDyOrd)
+AND OTH.id.rtStrId=OTS.id.rtStrId
+AND OTH.id.ordWs = OTS.id.ordWs
+AND OTH.id.trnSeq = OTS.id.trnSeq
+AND oth.id.dcDyOrd = ots.id.dcDyOrd)
+AND OTH.id.rtStrId=OTS.id.rtStrId
+AND OTH.id.ordWs = OTS.id.ordWs
+AND OTH.id.trnSeq = OTS.id.trnSeq
+AND oth.id.dcDyOrd = ots.id.dcDyOrd
+AND OTS.ordIdCt = CUST.customerHeaderPK.custId
+AND OTH.emId = MSTR.id.empId ORDER BY OTS.id.dcDyOrd DESC
+		</query>
+	</named-query>
+	
+	
+		<!-- added by srinivas G to get serial numbers -->
+		<named-query name="SEARCH_SERIAL_NO">
+		<query>
+     	select serial from OrdInvShpQtySrlno serial where serial.id.idOrd = :ordId ORDER BY serial.id.itemId DESC
+   	 </query>
+	</named-query>
+	<!-- added by sharanya to get delivered line qty -->
+	<named-query name="GET_LINE_QNT">
+		<query>
+     	SELECT line FROM OrderTranLineItem line WHERE line.id.trnSeq IN(
+     	SELECT head.id.trnSeq FROM OrderTranHeader head WHERE head.id.trnSeq IN((
+     	SELECT transum.id.trnSeq FROM OrderTranSum transum WHERE transum.idOrd LIKE :ordId))
+     	AND head.ordTy='24')
+   	 </query>
+	</named-query>
+	
+	<named-query name="GET_SHIPPED_QTY">
+		<query>
+	     	select ship.id.orderId,ship.id.itemId,sum(ship.id.shippedQty) from OrderShipmentDetail ship where
+	     	ship.id.orderId = :orderId and ship.id.shippedQty is not null and ship.id.shippedQty>0 
+	     	group by ship.id.orderId,ship.id.itemId
+   	 	</query>
+	</named-query>
+	
+	<named-query name="GET_PICKED_QTY">
+		<query>
+	     	select ship.id.orderId,ship.id.itemId,sum(ship.pickQty) from OrderShipmentDetail ship where
+	     	ship.id.orderId = :orderId and ship.pickQty is not null and ship.pickQty>0 
+	     	group by ship.id.orderId,ship.id.itemId
+   	 	</query>
+	</named-query>
+	<named-query name="GET_INVALID_TRX">
+		<query>
+	     	SELECT oth FROM OrderTranHeader oth where oth.ordTy='23' and oth.scOrd = 0 and oth.transactionStatus = 1
+   	 	</query>
+	</named-query>
+	
+	<!-- added by srinivas to get sales agent mail id -->
+	 <named-native-query name="EMP_MAIL_ID">
+		<query>
+			<![CDATA[
+			SELECT EMPMSTR.EMAIL FROM RISPL_DK_EMP_MSTR EMPMSTR WHERE EMPMSTR.EMP_ID IN ( 
+			SELECT HEAD.EM_ID FROM ORD_TRAN_HEADER HEAD JOIN ORD_TRAN_SUM SUM ON HEAD.ORD_WS = SUM.ORD_WS 
+			AND HEAD.RT_STR_ID = SUM.RT_STR_ID 
+			AND HEAD.TRN_SEQ = SUM.TRN_SEQ 
+			AND HEAD.DC_DY_ORD = SUM.DC_DY_ORD WHERE SUM.ID_ORD = ?
+			)
+			]]>
+		</query>
+	</named-native-query> 
+	
+	
+	<!-- added by srinivas to get department head mail id -->
+	 <named-native-query name="DEPTHEAD_MAIL_ID">
+		<query>
+			<![CDATA[
+			SELECT EMSTR.EMAIL FROM RISPL_DK_CUST_HDR CHDR
+INNER JOIN RISPL_DK_EMP_MERCH_ASSOC EMRCH ON EMRCH.MERCH_ID=CHDR.DIVISION_ID
+INNER JOIN RISPL_DK_EMP_MSTR EMSTR ON EMSTR.EMP_ID=EMRCH.EMP_ID
+WHERE CHDR.CUST_ID=? AND EMSTR.WRK_GP_ID IN ('2','7')
+			]]>
+		</query>
+	</named-native-query> 
+	
+	<!-- added by sharanya to get SalesAgent mail id passing parameter as OrdID -->
+	<named-native-query name="GET_SALESAGENT_MAILID">
+		<query>
+			<![CDATA[
+SELECT EMP.EMAIL FROM ORD_TRAN_HEADER OTH,ORD_TRAN_SUM OTS,RISPL_DK_EMP_MSTR EMP WHERE OTH.TRN_SEQ = OTS.TRN_SEQ AND 
+OTH.ORD_WS = OTS.ORD_WS AND
+OTH.RT_STR_ID = OTS.RT_STR_ID AND
+OTH.DC_DY_ORD = OTS.DC_DY_ORD AND 
+OTH.EM_ID= EMP.EMP_ID AND
+OTH.ORD_TY = ('24') AND
+OTS.ID_ORD =?
+			]]>
+			</query>
+			</named-native-query>
+			
+			<!-- added by sharanya to get DataEntryOptr mail id passing parameter as OrdID -->
+			<named-native-query name="GET_DATAENTRYOP_MAILID">
+		<query>
+			<![CDATA[
+SELECT EMP.EMAIL FROM 
+ORD_TRAN_HEADER HEAD,
+ORD_TRAN_SUM TSUM ,RISPL_DK_EMP_MSTR EMP WHERE HEAD.RT_STR_ID=TSUM.RT_STR_ID AND
+HEAD.ORD_WS=TSUM.ORD_WS AND 
+HEAD.TRN_SEQ=TSUM.TRN_SEQ AND
+HEAD.DC_DY_ORD=TSUM.DC_DY_ORD AND
+HEAD.EM_ID= EMP.EMP_ID AND
+HEAD.ORD_TY = ('24') AND
+TSUM.ID_ORD=?
+		]]>
+			</query>
+			</named-native-query>
+			
+			
+			<!-- added by sharanya to get DeparmentHead mail id passing parameter as OrdID -->
+			<named-native-query name="GET_DepartmentHead_MAILID">
+		<query>
+			<![CDATA[
+SELECT EMSTR.EMAIL FROM RISPL_DK_EMP_MSTR EMSTR
+INNER JOIN RISPL_DK_EMP_MERCH_ASSOC MERCH ON EMSTR.EMP_ID=MERCH.EMP_ID 
+WHERE EMSTR.WRK_GP_ID IN ('2','7')
+AND MERCH.MERCH_ID IN (
+
+SELECT CHEAD.DIVISION_ID FROM 
+ORD_TRAN_HEADER HEAD INNER JOIN ORD_TRAN_SUM TSUM
+ON HEAD.RT_STR_ID=TSUM.RT_STR_ID AND HEAD.ORD_WS=TSUM.ORD_WS AND HEAD.TRN_SEQ=TSUM.TRN_SEQ AND HEAD.DC_DY_ORD=TSUM.DC_DY_ORD
+INNER JOIN RISPL_DK_CUST_SITE_INV INV ON TSUM.ID_ORD = INV.ORDER_NUM
+INNER JOIN RISPL_DK_CUST_HDR CHEAD ON CHEAD.CUST_ID=INV.CUST_ID
+WHERE HEAD.ORD_TY = '24'
+AND HEAD.SC_TRAN ='2'
+AND INV.ORDER_NUM = ? )
+		]]>
+			</query>
+			</named-native-query>
+			
+	
+</entity-mappings>
+<!-- update OrderTranHeader header set header.idTlogBtch=:test where (header.rtStrId,header.ordWs,header.trnSeq,header.dcDyOrd)=
+     (SELECT T1.trnSeq, T1.dcDyOrd,T1.ordWs,	 T1.rtStrId	 FROM OrderTranSum T2,	 OrderTranHeader T1 WHERE T1.rtStrId = T2.rtStrId 
+     AND T1.ordWs  = T2.ordWs	AND T1.trnSeq     = T2.trnSeq AND T1.dcDyOrd = T2.dcDyOrd AND T2.idOrd     = :orderId) -->
+

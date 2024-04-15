@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system-libraries>
+    <library path="server/lib/api.jar"/>
+    <library path="server/lib/wls-api.jar"/>
+    <library path="modules/com.oracle.weblogic.servlet.jar"/>
+    <library path="modules/com.bea.core.weblogic.web.api.jar"/>
+</system-libraries>

@@ -1,0 +1,319 @@
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="claim" extends="login">
+
+		<action name="claim_search" class="rispl.ds.claim.RejectClaim">
+			<result name="success">/claim_search.jsp</result>
+		</action>
+				<action name="allClaimByCustomerName" class="rispl.ds.claim.RejectClaim" method="getRejectClaimByCustomerName">
+			<result  name="success">/claim_search.jsp</result>
+		</action>
+		<action name="ClaimSearchDetails" class="rispl.ds.claim.ApproveClaimAction" 
+				method="getClaimDetails">
+			<result name="success">/Claim_Search_detail.jsp</result>
+		</action>
+		
+		<!--added by lalit for the claim edi   -->
+		
+		<action name="ediUploadFileSelectForClaim" class="com.retailsols.sds.edi.EdiUploadFileSelect" >
+     	<result name="success">/SelectEdiUploadFile.jsp</result>
+     	<result name="error">/generateClaim.jsp</result>
+     </action>
+		
+		 <action name="uploadEDIFileClaim" class="com.retailsols.sds.edi.PreProcessUploadHandlerClaim">
+    	<interceptor-ref name="exception"/>
+    	<interceptor-ref name="fileUpload"/>
+    <interceptor-ref name="basicStack"/>
+    <result name="success">/generateClaim.jsp</result>
+    <result name="error">/generateClaim.jsp</result>
+	</action>
+	<action name="handleEDIUpload" class="com.retailsols.sds.edi.HandleUploadFile" >
+		<interceptor-ref name="token" />
+		<interceptor-ref name="defaultStack" />
+     	<result name="success">/EDIUploadStatus.jsp</result>
+     	<result name="error">/SelectEdiUploadFile.jsp</result>
+     	<result name="invalid.token">/customer_search.jsp</result>
+     </action>
+     <action name="searchItemAction" class="rispl.ds.order.NewOrderAction"
+			method="searchItem">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="encoding">UTF-8</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		
+	<!-- EDI related end  -->
+		<action name="generateClaim" class="rispl.ds.claim.GenerateClaim">
+			<result name="success">/generateClaim.jsp</result>
+		</action>
+
+		<!-- to create an tran sequence by ajax call -->
+		<action name="createOrder" class="rispl.ds.order.NewOrderAction"
+			method="createOrder">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		
+		<action name="returnQtyUpdate" class="rispl.ds.claim.GenerateClaim"
+			method="returnQtyUpdate">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+		
+		<action name="returnPriceUpdate" class="rispl.ds.claim.GenerateClaim"
+			method="returnPriceUpdate">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+
+		<action name="registerClaim" class="rispl.ds.claim.GenerateClaim"
+			method="registerClaim">
+			<result name="success">/doneWithoutInvoiceClaim.jsp</result>
+			<result name="failure">/login.jsp</result>
+		</action>
+
+		<action name="returnReasonCodeUpdate" class="rispl.ds.claim.GenerateClaim"
+			method="returnReasonCodeUpdate">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+			</result>
+		</action>
+<!-- implemented for Claim ref  -->
+        <action name="addClaimRefNo" class="rispl.ds.claim.GenerateClaim"
+			method="addClaimRefNo">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+				<param name="includeProperties">
+					actionErrors.*,
+					actionMessages.*,
+					fieldErrors.*,					
+					claimRefNo,
+					claimId,
+					claimRefdate
+				</param>
+			</result>
+		</action>
+
+
+		<action name="doneRegisterClaim" class="rispl.ds.claim.GenerateClaim"
+			method="doneRegisterClaim">
+			<result name="success" type="redirect">generateClaim</result>
+		</action>
+		
+	 <action name="cancelRegisterClaim" class="rispl.ds.claim.ClaimAction"
+			method="cancelClaim">
+			<result name="success" type="redirect">generateClaim</result>
+		</action>
+		
+		<action name="claimdetailmail" class="util.email.SendClaimEmail" method="getValidateStatus">
+			<result name="success">/Claim_Search_detail.jsp</result>
+			<result name="error">/Claim_Search_detail.jsp</result>
+		</action>
+
+	</package>
+	
+	<package name="acceptClaims" extends="login">
+
+
+		<action name="claimAccept" class="rispl.ds.claim.AcceptClaim" method="getAcceptClaimsList">
+			<result name="success">/Accept_claims.jsp</result>
+			<result name="failure">/Accept_claims.jsp</result>
+		</action>
+		
+		<action name="readyToAcceptClaimDetails" class="rispl.ds.claim.AcceptClaim" method ="readyToAcceptClaimInfo">
+			<result name="success">/readyToAcceptClaimDetails.jsp</result>
+			<result name="error" type="redirectAction">claimAccept</result> 
+		</action>
+		
+		<action name="saveAcceptClaim" class="rispl.ds.claim.AcceptClaim" method ="saveAcceptClaimDetails">
+		<result name="success">/acceptedClaimSummary.jsp</result>
+		<result name="error" type="redirectAction">claimAccept</result> 
+		</action>
+		
+		<!-- <action name="rejectAwaitingForAcceptClaim" class="rispl.ds.claim.AcceptClaim" method="rejectClaim">
+			<result type="redirectAction">claimAccept</result>
+		</action> -->
+		
+	</package>
+	
+
+	<package name="register_claim_with_invoice" extends="login">
+	
+		<action name="invoiceSearchByOrderOrInvoice" class="rispl.ds.claim.ClaimAction"
+			method="invoiceSearchByOrderOrInvoice">
+			<!-- <result type="json"> <param name="root">newClaim</param> </result> -->
+			<result>/generateClaim.jsp</result>
+		</action>
+		
+		<!-- <action name="orderSearchByOrder" class="rispl.ds.claim.ClaimAction"
+			method="orderSearchByOrder">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					actionErrors.*,
+					actionMessages.*,
+					fieldErrors.*,
+					lineItems.*,
+					customerName,
+					customerID,
+					customerSegment,
+					invoiceID
+				</param>
+			</result>
+		</action> -->
+		
+		<!-- YET TO IMPLEMENT MANAGER OVERRIDE
+		<action name="managerLogin" class="rispl.ds.login.LoginAction"
+			method="managerLogin">
+			<result type="json">
+				<param name="noCache">true</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					actionErrors.*,
+					actionMessages.*,
+					fieldErrors.*,
+					managerOverride
+				</param>
+			</result>
+		</action> -->
+		
+		<action name="saveClaim" class="rispl.ds.claim.ClaimAction"
+			method="saveClaim">
+			<!-- <result type="json"> <param name="root">newClaim</param> </result> -->
+			<result name="error">/generateClaim.jsp</result>
+			<result name="success">/registeredClaim.jsp</result>
+		</action>
+		<!-- <action name="approveClaimButton" class="rispl.ds.claim.ClaimAction"
+			method="approveClaimButton">
+			<result type="json"> <param name="root">newClaim</param> </result>
+			<result name="error">/generateClaim.jsp</result>
+			<result name="success">/registeredClaim.jsp</result>
+		</action> -->
+	</package>
+	
+	<package name="approve_claim" extends="login">
+
+		<action name="approveClaim" class="rispl.ds.claim.ApproveClaimAction">
+			<result>/approveClaims.jsp</result>
+		</action>	
+		<action name="saveApproveClaim" class="rispl.ds.claim.ApproveClaimAction" method="saveApproveClaimDetails">
+			<!-- <result type="redirectAction">approveClaim</result> -->
+				<result name="error" type="redirectAction">approveClaim</result>
+			<result name="success">/approvedClaimSummary.jsp</result>
+		</action>
+		<action name="rejectAwaitingForApproveClaim" class="rispl.ds.claim.ApproveClaimAction" method="rejectClaim">
+		<result name="success">/rejectedClaimSummary.jsp</result>
+		<result name="error" type="redirectAction">approveClaim</result>
+			<!-- <result type="redirectAction">approveClaim</result> -->
+		</action>		
+		
+		<action name="approveClaimButton" class="rispl.ds.claim.ApproveClaimAction" 
+			method="approveClaimButton">
+			<!-- <result type="json"> <param name="root">newClaim</param> </result> -->
+			<result name="success">/dashboard.jsp</result>
+		</action>
+		<action name="rejectClaimButton" class="rispl.ds.claim.ApproveClaimAction" 
+			method="rejectClaimButton">
+			<!-- <result type="json"> <param name="root">newClaim</param> </result> -->
+			<result name="success">/dashboard.jsp</result>
+		</action>
+		<action name="approveClaimDetails" class="rispl.ds.claim.ApproveClaimAction" 
+				method="approveClaimDetails">
+				<result name="error" type="redirectAction">approveClaim</result>
+			<result name="success">/approveClaimsDetails.jsp</result>
+		</action>
+	
+	</package>
+	<package name="Rejected_claim" extends="login">
+
+		<action name="rejectClaim" class="rispl.ds.claim.RejectClaim">
+			<result>/rejected_Claims.jsp</result>
+		</action>
+<!-- 		<action name="rejectClaimByOrderId" class="rispl.ds.claim.RejectClaim" method="getRejectClaimByOrderId">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					actionErrors.*,
+					actionMessages.*,
+					fieldErrors.*,
+					rejectClaim_List.*
+				</param>
+			</result>
+		</action> -->
+		
+<!-- 		<action name="rejectClaimByClaimId" class="rispl.ds.claim.RejectClaim" method="getRejectClaimByClaimId">
+			<result type="json">
+				<param name="excludeNullProperties">true</param>
+				<param name="noCache">true</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					actionErrors.*,
+					actionMessages.*,
+					fieldErrors.*,
+					rejectClaim_List.*
+				</param>
+			</result>
+		</action>
+		 -->
+<!-- 		<action name="rejectClaimByCustomerName" class="rispl.ds.claim.RejectClaim" method="getRejectClaimByCustomerName">
+			<result type="json">
+				<param name="excludeNullProperties">false</param>
+				<param name="noCache">true</param>
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					actionErrors.*,
+					actionMessages.*,
+					fieldErrors.*,
+					rejectClaim_List.*
+				</param>
+			</result>
+		</action> -->
+				<action name="rejectClaimByCustomerName" class="rispl.ds.claim.RejectClaim" method="getRejectClaimByCustomerName">
+			<result  name="success">/rejected_Claims.jsp</result>
+
+		</action>
+		
+
+		<action name="rejectClaimDetail" class="rispl.ds.claim.ApproveClaimAction" 
+				method="getClaimDetails">
+			<result>/RejectedClaim_detail.jsp</result>
+		</action>
+		
+		
+		
+		<action name="downloadClaim" class="rispl.ds.claim.ApproveClaimAction"
+			method="getClaimSave">
+			<result name="success" type="stream">
+				<param name="contentDisposition">attachment;filename=claim_${claimID}.pdf</param>
+				<param name="contentType">application/pdf</param>
+				<param name="inputName">inputStream</param>
+				<param name="bufferSize">4096</param>
+			</result>
+			<result name="error" type="stream">
+				<param name="contentType">text/html</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+		
+		
+	</package>
+	
+	
+	
+	
+</struts>

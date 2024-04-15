@@ -1,0 +1,137 @@
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="pdfstream-showcase" namespace="/" extends="pdfstream-default">
+
+		<!-- Added new Action for save claim Details in PDF file @jagadish-->
+		<action name="claimPDFDownload" class="com.retailsols.downloadPDF.ClaimDetailsDownloadPDFAction" method="downloadClaimDetails">
+            <result type="pdfstream">
+                <param name="location">/WEB-INF/ftl/claimDetailsPDF.ftl</param>
+                <param name="renderer">freemarker</param>
+                <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=claimDetails_${claimID}.pdf</param>
+            </result>
+        </action>
+		
+		<!-- Added new Action for save Rejected claim Details in PDF file @jagadish-->
+		<action name="rejectedClaimPDFDownload" class="com.retailsols.downloadPDF.ClaimDetailsDownloadPDFAction" method="downloadClaimDetails">
+            <result type="pdfstream">
+                <param name="location">/WEB-INF/ftl/rejectedClaimPdf.ftl</param>
+                <param name="renderer">freemarker</param>
+                <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=RejectclaimDetails_${claimID}.pdf</param>
+            </result>
+        </action>
+		
+		<!-- Added new Action for save Approve claim Details in PDF file @jagadish-->
+		<action name="approveClaimPDFDownload" class="com.retailsols.downloadPDF.ClaimDetailsDownloadPDFAction" method="downloadClaimDetails">
+            <result type="pdfstream">
+                <param name="location">/WEB-INF/ftl/approveClaimPdf.ftl</param>
+                <param name="renderer">freemarker</param>
+                <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=ApproveclaimDetails_${claimID}.pdf</param>
+            </result>
+        </action>
+		
+		<!-- Added new Action for save Accept claim Details in PDF file @jagadish-->
+		<action name="acceptClaimPDFDownload" class="com.retailsols.downloadPDF.ClaimDetailsDownloadPDFAction" method="downloadAcceptClaimDetails">
+            <result type="pdfstream">
+                <param name="location">/WEB-INF/ftl/acceptClaimPdf.ftl</param>
+                <param name="renderer">freemarker</param>
+                  <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=AcceptclaimDetails_${claimID}.pdf</param>
+            </result>
+        </action>
+        
+        <!-- Added new Action for save Credit Note Details in PDF file @jagadish-->
+		<action name="creditNotePDFDownload" class="com.retailsols.sds.creditmemo.CreditMemoSummayAction">
+            <result type="pdfstream">
+                <param name="location">/WEB-INF/ftl/creditNotePdf.ftl</param>
+                <param name="renderer">freemarker</param>
+                <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=creditNoteDetails_${crmemoId}.pdf</param>
+            </result>
+        </action>
+        
+        <!-- Added new Action for save Receipt Note Details in PDF file @jagadish-->
+		<action name="receiptPDFDownload" class="com.retailsols.sds.receipt.ReceiptSummaryAction">
+            <result type="pdfstream">
+                <param name="location">/WEB-INF/ftl/receiptPdf.ftl</param>
+                <param name="renderer">freemarker</param>
+                <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=receiptDetails_${receiptId}.pdf</param>
+            </result>
+        </action>
+        
+       <!-- Added new Action for save Saved Order Details in PDF file @jagadish-->
+		<action name="savedOrderPDFDownload" class="com.retailsols.downloadPDF.OrderDetailsDownloadPDFAction" method="downloadSavedOrdDetails">
+            <result type="pdfstream">
+                <param name="location">/WEB-INF/ftl/savedOrdDetailsPdf.ftl</param>
+                <param name="renderer">freemarker</param>
+                <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=savedOrderDetails_${orderId}.pdf</param>
+            </result>
+        </action>
+        
+       <!-- Added new Action for save returned Order Details in PDF file @jagadish-->
+		<action name="returnOrderPDFDownload" class="rispl.ds.order.ReturnedOrders" method="getReturnedOrderDetailsByOrderId">
+            <result type="pdfstream">
+                <param name="location">/WEB-INF/ftl/returnOrdDetailsPdf.ftl</param>
+                <param name="renderer">freemarker</param>
+                <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=returnOrderDetails_${orderId}.pdf</param>
+            </result>
+        </action>
+       
+       <!-- Added new Action for save Cancel Order Details in PDF file @jagadish-->
+		<action name="cancelOrderPDFDownload" class="rispl.ds.order.OrderSearchSummaryAction" method="displayCancelOrderDetails">
+            <result type="pdfstream">
+                <param name="location">/WEB-INF/ftl/cancelOrdDetailsPdf.ftl</param>
+                <param name="renderer">freemarker</param>
+                <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=cancelOrderDetails_${orderId}.pdf</param>
+            </result>
+        </action> 
+        
+        <!-- Added new Action for Delivered Order Details in PDF file @jagadish-->
+		<action name="deliveredorderPDFDownload" class="rispl.ds.order.OrderSearchSummaryAction">
+            <result type="pdfstream">
+                <param name="location">/WEB-INF/ftl/deliveredOrdDetailsPdf.ftl</param>
+                <param name="renderer">freemarker</param>
+                <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=deliveredOrderDetails_${orderId}.pdf</param>
+            </result>
+        </action>
+        
+        <!-- Added new Action for Order Details in PDF file @jagadish-->
+        <action name="orderPDFDownload" class="rispl.ds.order.OrderSearchSummaryAction">
+            <result type="pdfstream">
+                <param name="location">/WEB-INF/ftl/orderDetailsPdf.ftl</param>
+                <param name="renderer">freemarker</param>
+                <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=OrderDetails_${orderId}.pdf</param>
+            </result>
+        </action> 
+        
+        <!-- Added new Action for Register Claim WithOut Invoice Details in PDF file @jagadish-->
+    	<action name="registerClaimWitOutInvPDFDownload" class="com.retailsols.downloadPDF.ClaimDetailsDownloadPDFAction" method="registerClaimWithInvDetails">
+         	<result type="pdfstream">
+				<param name="location">/WEB-INF/ftl/regiClaimWitOutInvDetailsPdf.ftl</param>
+                <param name="renderer">freemarker</param>
+                <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=RegiClaimWitOutInv_${claimID}.pdf</param>
+            </result>             
+        </action>
+        
+        <!-- Added new Action for Register Claim With Invoice Details in PDF file @jagadish-->
+    	<action name="registerClaimWithInvPDFDownload" class="com.retailsols.downloadPDF.ClaimDetailsDownloadPDFAction" method="registerClaimWithInvDetails">
+         	<result type="pdfstream">
+				<param name="location">/WEB-INF/ftl/regiClaimWithInvDetailsPdf.ftl</param>
+                <param name="renderer">freemarker</param>
+                <param name="cssPaths">css/bootstrap.min.css, css/style.css</param>
+                <param name="contentDisposition">attachment;filename=RegiClaimWithInv_${claimID}.pdf</param>
+            </result>             
+        </action>
+    </package>
+</struts>

@@ -1,0 +1,239 @@
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+	<package name="order_lookup" extends="sds-default">
+   
+      	<action name="order_Search">
+      		<result>/order_Search.jsp</result>
+      	</action>
+      	
+     	<action name="order_search_with_order" class="rispl.ds.order.OrderSearchWithOrderAction">
+   			<result name="success">/order_Search.jsp</result>
+   		</action>
+   		
+   		<action name="order_search_with_invoice" class="rispl.ds.order.OrderSearchWithInvoiceAction">
+   			<result name="success">/order_Search.jsp</result>
+   		</action>
+   		
+   		<action name="order_search_with_customer" class="rispl.ds.order.OrderSearchWithCustomerAction">
+   			<result name="success">/order_Search.jsp</result>
+   		</action>
+   		
+   		<action name="orders_details_page" class="rispl.ds.order.OrderSearchSummaryAction">
+   			<result name="success">/order_details.jsp</result>
+   			<result name="error,input">/order_details.jsp</result>
+   		</action>
+   		<!--  lokesh for credit note, receipt details display -->
+   		<action name="credit_memo_details_page" class="com.retailsols.sds.creditmemo.CreditMemoSummayAction">
+   			<result name="success">/credit_memo_details.jsp</result>
+   		</action>
+   		<action name="receiptDetails" class="com.retailsols.sds.receipt.ReceiptSummaryAction">
+   			<result name="success">/CustomerReceiptDetails.jsp</result>
+   		</action>
+   		<!-- lokesh end -->
+   		
+   		<action name="invoice_orders_details_page" class="rispl.ds.order.OrderSearchSummaryAction">
+   			<result name="success">/order_details.jsp</result>
+   		</action>
+   		
+   		
+   		<!-- comment by jagadish because we are using another action name to perform Delivered order detail page.   
+   		<action name="DeliveredOrders_details_page" class="rispl.ds.order.OrderSearchSummaryAction">
+   			<result name="success">/DeliveredOrder_detail.jsp</result>
+   		</action>
+   		 -->
+   		<!--  Mudassir -->
+   		<action name="MarkOrderDeliveredInDOScreen1" class="rispl.ds.order.MarkOrderAsDelivered" method="markOrderToDelivered">
+   			<result name="success">/DeliveredOrder_detail.jsp</result> 
+   		</action>
+   		
+   		<!--  Mudassir -->
+   		<action name="MarkOrderDeliveredInDOScreen" class="rispl.ds.order.MarkOrderAsDelivered" method="markOrderToDelivered">
+   			<result name="success">/Delivered_Order.jsp</result> 
+   		</action>
+   		
+   		
+   		<action name="returnedOrders"><result>/ReturnedOrders.jsp</result></action>
+   		
+      	<action name="MarkOrderDelivered" class="rispl.ds.order.ReturnedOrders" method="getReturnedOdersbyCustmerInfo">
+   			<result name="success">/ReturnedOrders.jsp</result> 
+   		</action>
+   		
+   				
+   	<action name="DeliveredInvoiceDetail" class="rispl.ds.invoice.Invoice" method="InvoiceDetailSearch">
+			<result name="success">/DeliveredInvoice_detail.jsp</result>
+		</action>
+   				<action name="deliveredOrders" class="rispl.ds.invoice.Invoice" method="deliveredOrderLoadPageAction">
+   			
+			<result name="success">/Delivered_Order.jsp</result>
+		</action>
+   			<!-- 	<action name="delvInvoiceSearchByOrder" class="rispl.ds.invoice.Invoice" method="invSearchByOrder"> -->
+		<action name="delvInvoiceSearchByOrder" class="rispl.ds.invoice.Invoice" method="deliveredOrderSearchByCustAndOrder">
+			<result name="success">/Delivered_Order.jsp</result>
+		</action>
+			<!-- 	<action name="delvOrderSearchbyCustomer" class="rispl.ds.invoice.Invoice" method="delOrderSearchbyCustomer"> -->
+				<action name="delvOrderSearchbyCustomer" class="rispl.ds.invoice.Invoice" method="deliveredOrderSearchByCustAndOrder">
+			<result name="success">/Delivered_Order.jsp</result>
+		</action>
+		
+		
+   		<action name="cancelledOrders"><result>/cancelledOrders_search.jsp</result></action>
+   		
+   		<action name="cancelledOrderbyOrder" class="rispl.ds.order.cancel.CanceledOrderSearchAction" method="fetchCancelOrderDetailsByOrderID">
+			<result name="success">/cancelledOrders_search.jsp</result></action>
+   		
+   		<action name="cancelledOrdersbyCustomer" class="rispl.ds.order.cancel.CanceledOrderSearchAction" method="fetchCancelOrderDetailsByCustomer">
+			<result name="success">/cancelledOrders_search.jsp</result></action>
+   		
+   		<action name="cancelledOrderDetailsPage" class="rispl.ds.order.OrderSearchSummaryAction" method="displayCancelOrderDetails">
+   			<result name="success">/cancelledOrder_detail.jsp</result>
+   		</action>
+   		<!-- mudassir for pending orders -->
+   		<action name="savedOrder" class="rispl.ds.order.PendingOrderAction" method="getPendingOrders">
+   			<result name="success">/Pending_Orders.jsp</result>
+   		</action>
+   		<!-- mudassir for pending order click -->
+   		<!-- changed by hanu -->
+   		 <action name="savedOrderClick" class="rispl.ds.order.PendingOrderAction" method="setPendingOrderSession">
+            <result name="success">/ConfirmOrder.jsp</result>
+            	<result name="input">/ConfirmOrder.jsp</result>
+        </action>
+          		<!-- mudassir for pending order Edit action -->
+         <action name="pendingOrderStatusChanged" class="rispl.ds.order.PendingOrderAction" method="changeStatusOfQuoted">
+            <result name="success" type="chain">editOrder</result>
+            </action>
+            	<!-- mudassir for pending order confirm action 
+         <action name="pendingOrderConfirm" class="rispl.ds.order.PendingOrderAction" method="changeStatusOfQuoted">
+            <result name="success" type="chain">bookSalesOrder</result>
+            
+        </action>-->
+         <action name="DeliveredOrderClick" class="rispl.ds.order.OrderSearchSummaryAction" method="setDeliveredOrderKey">
+            <result name="success">/DeliveredOrder_detail.jsp</result>
+            	<result name="input">/DeliveredOrder_detail.jsp</result>
+        </action>
+       
+        
+        <!-- lokesh download order as pdf begin -->
+        <action name="downloadOrder" class="rispl.ds.invoice.Invoice"
+			method="downloadCustomerOrder">
+			<result name="success" type="stream">
+				<param name="contentDisposition">attachment;filename=order_${orderID}_${custID}.pdf</param>
+				<param name="contentType">application/pdf</param>
+				<param name="inputName">inputStream</param>
+				<param name="bufferSize">4096</param>
+			</result>
+			<result name="error" type="stream">
+				<param name="contentType">text/html</param>
+				<param name="inputName">inputStream</param>
+			</result>
+		</action>
+        <!-- lokesh download order as pdf end -->
+        
+        <action name="CancelOrder" class="rispl.ds.order.cancel.CancelOrderAction" method="cancelOrder">
+        <result name="success">/DoneSalesOrder.jsp</result>
+        <result name="input">/DoneSalesOrder.jsp</result>
+        <result name="error" type="redirectAction">
+        <param name="actionName">orders_details_page</param>
+        <param name="orderId">${orderId}</param>
+        <param name="errorMessage">${errorMessage}</param>
+        </result> 
+        </action>
+  		<action name="openorders">
+      		<result>/openOrdersSearch.jsp</result>
+      	</action>
+      	<!-- Mudassir Open Order Search Start -->
+      	<action name="openOrdersSearchByOrder" class="rispl.ds.order.OpenOrderSearchAction" method="openOrderSearchFotTab1and2">
+      	<result name="success">/openOrdersSearch.jsp</result>
+      	<result name="error">/openOrdersSearch.jsp</result>
+      	</action>
+        <action name="openOrdersSearchByCustomer" class="rispl.ds.order.OpenOrderSearchAction" method="openOrderSearchFotTab1and2">
+        <result name="success">/openOrdersSearch.jsp</result>
+      	<result name="error">/openOrdersSearch.jsp</result>
+        </action>
+        <!-- Open Order Search End -->
+      	<!-- Srinivas Reddy G for Returned Orders Search begin -->
+     	<action name="returnedOrdersByOrderInfo" class="rispl.ds.order.ReturnedOrders" method="getReturnedOrdersByOrderAndCustomerAndItemInfo">
+      	<result name="success">/ReturnedOrders.jsp</result>
+        <result name="input">/ReturnedOrders.jsp</result>
+      	</action>
+      	
+      	<action name="returnedOrdersByCustInfo" class="rispl.ds.order.ReturnedOrders" method="getReturnedOrdersByOrderAndCustomerAndItemInfo">
+      	<result name="success">/ReturnedOrders.jsp</result>
+        <result name="input">/ReturnedOrders.jsp</result>
+      	</action> 
+      	<action name="returnedOrdersDetailsPage" class="rispl.ds.order.ReturnedOrders" method="getReturnedOrderDetailsByOrderId">
+      	<result name="success">/returned_Order_Details.jsp</result>
+        <result name="error" type="redirectAction">
+        <param name="actionName">returnedOrders</param>
+        <param name="orderId">${orderId}</param>
+        </result> 
+      	</action> 
+      	<!-- Srinivas Reddy G for Returned Orders Search begin -->
+   </package>
+         <package name="default" extends="json-default">
+   <action name="checkInventory" class="rispl.ds.order.ConfirmSaleOrderAction" method="checkInventory">
+   <result type="json">
+        <param name="excludeNullProperties">true</param>
+        <param name="noCache">true</param>
+   </result>
+   </action>
+   <!-- sharanya for mail Start -->
+     <action name="orderdetailmail" class="util.email.ConfirmOrderEmail" method="sendOrderEmail">
+     <result name="success">/order_details.jsp</result>
+     <result name="error">/order_details.jsp</result>
+     </action>
+   <action name="receiptdetailmail" class="util.email.ReceiptEmail" method="sendReceiptEmail">
+        <result name="success">/CustomerReceiptDetails.jsp</result>
+          <result name="error">/CustomerReceiptDetails.jsp</result>
+        </action>
+   <action name="creditmemodetailmail" class="util.email.SendClaimEmail" method="sendCreditMemoEmail">
+        <result name="success">/credit_memo_details.jsp</result>
+        <result name="error">/credit_memo_details.jsp</result>
+   </action>
+   <action name="returnorderdetailmail" class="util.email.ConfirmOrderEmail" method="sendReturnOrderEmail">
+        <result name="success">/returned_Order_Details.jsp</result>
+        <result name="error">/returned_Order_Details.jsp</result>
+   </action>
+   
+      <!-- sharanya for mail End -->
+   <!-- EDI related actions start by lokesh -->  
+     <action name="ediUploadFileSelect" class="com.retailsols.sds.edi.EdiUploadFileSelect" >
+     	<result name="success">/SelectEdiUploadFile.jsp</result>
+     	<result name="error">/order_details.jsp</result>
+     </action>
+     <action name="uploadEDIFile" class="com.retailsols.sds.edi.PreProcessUploadHandler">
+    	<interceptor-ref name="exception"/>
+    	<interceptor-ref name="fileUpload"/>
+    <interceptor-ref name="basicStack"/>
+    <result name="success">/SelectCustomerAddressForEDI.jsp</result>
+    <result name="error">/SelectEdiUploadFile.jsp</result>
+	</action>
+	<action name="handleEDIUpload" class="com.retailsols.sds.edi.HandleUploadFile" >
+		<interceptor-ref name="token" />
+		<interceptor-ref name="defaultStack" />
+     	<result name="success">/EDIUploadStatus.jsp</result>
+     	<result name="error">/SelectEdiUploadFile.jsp</result>
+     	<result name="invalid.token">/customer_search.jsp</result>
+     </action>
+     <!-- EDI related actions end by lokesh -->
+     <action name="PrintOrderDetails" class="com.retailsols.sds.order.util.PrintOrderDetailsAction">
+     	<result name="success">/OrderDetailsForPrint.jsp</result>
+     	<result name="error">/customer_search.jsp</result>
+     </action>
+     
+     <action name="PrintLPODetails" class="com.retailsols.sds.order.util.PrintOrderLPOAction">
+     	<result name="success">/OrderLPODetailsForPrint.jsp</result>
+     	<result name="error">/customer_search.jsp</result>
+     </action>
+     
+     <action name="downloadOrder" class="com.retailsols.sds.order.util.PrintOrderDetailsAction">
+     	<param name="download">true</param>
+     	<result name="success">/OrderDetailsForPrint.jsp</result>
+     	<result name="error">/customer_search.jsp</result>
+     </action>
+     
+ </package>
+
+</struts>

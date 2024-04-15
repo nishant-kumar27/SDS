@@ -1,0 +1,133 @@
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+	<package name="customer" extends="sds-default">
+	
+		<global-results>
+			<result name="input">/customer_search.jsp</result>
+		</global-results>
+		
+		<!-- Saideep: For customer search page -->
+		<action name="customerSearch">
+			<result>/customer_search.jsp</result>
+		</action>
+
+		<!-- Saideep: For customer search Autocomplete using Ajax -->
+		<action name="customerLookupAjax" class="rispl.ds.customer.CustomerAction" method="customerLookup">
+			<!-- Testing security override to use logical parent permission -->
+			<param name="overrideSecurityAction">customerSearch</param>
+			<result name="error" type="json">
+				<param name="root">customerList</param>
+				<param name="excludeNullProperties">true</param>
+			</result>
+			<result name="*" type="json">
+				<param name="root">customerList</param>
+				<param name="excludeNullProperties">true</param>
+			</result>
+		</action>
+
+		<!-- Saideep: For customer search using form -->
+		<action name="customerLookup" class="rispl.ds.customer.CustomerAction" method="customerLookup">
+			<!-- Testing security override to use logical parent permission -->
+			<param name="overrideSecurityAction">customerSearch</param>
+			<result name="error">/customer_search.jsp</result>
+ 			<result name="single" type="redirectAction">
+ 				<param name="actionName">customerInfo</param>
+ 				<param name="customerId">${customerId}</param>
+ 			</result>
+ 			<result name="*">/customer_search.jsp</result>
+		</action>
+
+		<!-- Saideep: For showing customer information using customer id -->
+		<action name="customerInfo" class="rispl.ds.customer.CustomerAction" method="customerInfo">
+			<result name="success">/customerInfo.jsp</result>
+			<result name="error">/customer_search.jsp</result>
+		</action>
+
+		<!-- Saideep: For customer validation using Ajax -->
+		<action name="customerValidate" class="rispl.ds.customer.CustomerAction" method="customerValidate">
+			<interceptor-ref name="authStack"/><!-- Remove and set role action mapping -->
+			<!-- <result name="input">/customer_search.jsp</result> -->
+			<result name="error">/customerInfo.jsp</result>
+			<result name="success" type="redirectAction">
+				<param name="actionName">createNewOrder</param>
+				<param name="customerId">${customerId}</param>
+			</result>
+		</action>
+
+		<!-- Saideep: For creating new order -->
+		<action name="createNewOrder" class="rispl.ds.customer.CustomerAction" method="createNewOrder">
+			<interceptor-ref name="authStack"/><!-- Remove and set role action mapping -->
+			<interceptor-ref name="preRequest"/>
+			<!-- <result name="input">/customer_search.jsp</result> -->
+			<result name="error">/customerInfo.jsp</result>
+			<result name="success" type="redirectAction">newOrder</result>
+		</action>
+		
+		
+		
+		
+		
+		
+		
+		
+		<action name="customerlookup" class="rispl.ds.customer.CustomerAction" method="customerlookup">
+			<result name="success" type="json">
+				<param name="root">cust</param>
+				<param name="excludeNullProperties">true</param>
+			</result>
+		</action>
+
+		<action name="customerinfo" class="rispl.ds.customer.CustomerAction" method="customerinfo">
+			<result name="success">/customerInfo.jsp</result>
+			<result name="error" type="redirect">customerSearch</result>
+		</action>
+
+		<action name="validateCustomerOld" class="rispl.ds.customer.CustomerAction" method="validateCustomer">
+			<result name="success" type="redirectAction">newOrder</result>
+			<result name="error" type="redirectAction">
+ 				<param name="actionName">customerInfo</param>
+ 				<param name="customerId">${customerId}</param>
+ 			</result>
+		</action>
+
+		<action name="customerlookupAtClaims" class="rispl.ds.customer.CustomerAction"
+			method="customerlookupAtClaims">
+			<param name="claim">true</param>
+			<result name="success" type="json">
+				<param name="root">cust</param>
+				<param name="excludeNullProperties">true</param>
+			</result>
+
+		</action>
+		<action name="selectCustomerAtClaims" class="rispl.ds.customer.CustomerAction"
+			method="customerinfo">
+			<param name="claim">true</param>
+			<result name="success" type="json">
+				<param name="root">cust</param>
+				<param name="excludeNullProperties">true</param>
+			</result>
+
+		</action>
+
+
+		<!-- Move to New Order xml-->
+		<action name="newOrder" class="rispl.ds.order.NewOrderAction" method="createOrder">
+			<param name="editOrder">false</param>
+			<result name="input">/customer_search.jsp</result>
+			<result name="error">/customer_info.jsp</result>
+			<result name="failure">/login.jsp</result>		<!-- handle failure -->
+			<result name="success">/newOrder.jsp</result>
+		</action>
+		<action name="editOrder" class="rispl.ds.order.NewOrderAction"
+			method="createOrder">
+			<param name="editOrder">true</param>
+			<result name="error">/customer_info.jsp</result>
+			<result name="failure">/login.jsp</result>		<!-- handle failure -->
+			<result name="success">/newOrder.jsp</result>
+		</action>
+
+	</package>
+</struts>

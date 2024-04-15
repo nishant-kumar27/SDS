@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/* ===========================================================================
+* Copyright (c) 2009, 2013, Oracle and/or its affiliates. All rights reserved. 
+ * ===========================================================================
+ * $Header: rgbustores/internal/DIMP/Tax/TaxImport.xsd /main/9 2013/02/05 16:41:06 cgreene Exp $
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED    (MM/DD/YY)
+ *    cgreene   02/05/13 - rename common.xsd to CommonImport.xsd
+ *    abondala  01/02/10 - Update Header date
+ *
+ * ===========================================================================
+ */
+-->
+<!--
+/* ===========================================================================
+* Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved. 
+ * ===========================================================================
+ * $Header: rgbustores/internal/DIMP/Tax/TaxImport.xsd /main/9 2013/02/05 16:41:06 cgreene Exp $
+ * ===========================================================================
+ * NOTES
+ * <other useful comments, qualifications, etc.>
+ *
+ * MODIFIED    (MM/DD/YY)
+ *    blarsen   08/13/09 - Renamed FillType_type to FillType_subtype to avoid a
+ *                         collision with CommonImport.xsd.
+ *    jswan     12/11/08 - Changed tag name from TLogTaxCode to
+ *                         JurisdictionTypeCode.
+ *    jswan     12/11/08 - Checkin to prepare for code review.
+ *    cgreene   11/19/08 - migrate common types to ../CommonImport.xsd
+ *
+ * ===========================================================================
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:include schemaLocation="../CommonImport.xsd"></xs:include>
+	<xs:element name="TaxImport">
+		<xs:annotation><xs:documentation>
+ 			Copyright (c) 2006, 2013, Oracle and/or its affiliates. All rights reserved. 
+			XML Schema for data import of Tax Information. For Oracle Retail Store and Enterprise Applications.
+			Contains Tax Authorities, Taxable Groups, Tax Rules and Rates data.
+		</xs:documentation></xs:annotation>
+		<xs:complexType>
+		<xs:sequence>
+			<xs:element name="GEOCode" type="GEOCode_type" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="GEOTaxJurisdiction" type="GEOTaxJurisdiction_type" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="TaxAuthority" type="TaxAuthority_type" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="TaxableGroup" type="TaxableGroup_type" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element name="TaxGroupRule" type="TaxGroupRule_type" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="FillType" type="FillType_subtype" use="required" fixed="KillAndFill"/>
+		<xs:attribute name="CreationDate" type="xs:dateTime"/>
+		<xs:attribute name="ExpirationDate" type="xs:dateTime"/>
+		<xs:attribute name="Version" type="xs:string"/>
+		<xs:attribute name="Priority" type="xs:int"/>
+		<xs:attribute name="Batch" type="xs:int"/>
+	</xs:complexType>
+	</xs:element>
+
+	
+
+	<xs:complexType name="TaxAuthority_type">
+		<xs:sequence>
+			<xs:element name="TaxAuthorityID" type="xs:integer"/>
+			<xs:element name="TaxAuthorityName" type="xs:string"/>
+			<xs:element name="RoundingCode">
+				<xs:simpleType>
+					<xs:restriction base="xs:integer">
+						<xs:minInclusive value="1"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="RoundingDigitsQuantity" type="xs:integer" minOccurs="0"/>
+			<xs:element name="AddressLine" type="xs:string"/>
+			<xs:element name="City" type="xs:string"/>
+			<xs:element name="State" type="xs:string"/>
+			<xs:element name="PostalCode" type="xs:string"/>
+			<xs:element name="CountryCode" type="xs:string"/>
+			<xs:element name="GeoCodeID" type="xs:string" maxOccurs="unbounded"/>
+			<xs:element name="JurisdictionTypeCode" type="xs:string">
+		        <xs:annotation><xs:documentation>
+		            When a store is set up to use US Sales Tax and the Oracle Merchandising 
+		            Application, JurisdictionTypeCode with be sent to ReSA as the TaxCode. 
+		        </xs:documentation></xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="TaxableGroup_type">
+		<xs:sequence>
+			<xs:element name="TaxGroupID" type="xs:integer"/>
+			<xs:element name="TaxGroupName" type="xs:string" minOccurs="1" maxOccurs="1"/>
+			<xs:element name="TaxGroupDescription" type="xs:string"/>
+			<xs:element name="ReceiptPrintCode" type="xs:integer" minOccurs="0"/>
+			<xs:element name="LocalizedTaxGroupNameDescription" type="LocalizedNameDescription_type" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="TaxGroupRule_type">
+		<xs:sequence>
+			<xs:element name="TaxAuthorityID" type="xs:integer"/>
+			<xs:element name="TaxGroupID" type="xs:string"/>
+			<xs:element name="TaxTypeID" type="xs:integer"/>
+			<xs:element name="TaxTypeName" type="xs:string" minOccurs="0">
+		        <xs:annotation><xs:documentation>
+		            When a store is set up to use VAT and the Oracle Merchandising 
+		            Application, TaxTypeName with be sent to ReSA as the TaxCode. 
+		        </xs:documentation></xs:annotation>
+			</xs:element>
+			<xs:element name="TaxHolidayFlag" type="xs:boolean"/>
+			<xs:element name="TaxRuleName" type="xs:string"/>
+			<xs:element name="TaxRuleDescription" type="xs:string"/>
+			<xs:element name="CompoundRateSequenceNumber" type="xs:integer" minOccurs="0"/>
+			<xs:element name="TaxOnGrossAmountFlag" type="xs:boolean" minOccurs="0"/>
+			<xs:element name="CalculationMethodCode" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:NMTOKEN">
+						<xs:enumeration value="LineItem"/>
+						<xs:enumeration value="Transaction"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="TaxRateRuleUsageCode">
+				<xs:simpleType>
+					<xs:restriction base="xs:NMTOKEN">
+						<xs:enumeration value="PercentageOrAmount"/>
+						<xs:enumeration value="DeriveFromTaxTable"/>
+						<xs:enumeration value="UseThresholdAmount"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="InclusiveTaxFlag" type="xs:boolean"/>
+			<xs:element name="TaxRateRule" type="TaxRateRule_type" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="TaxRateRule_type">
+		<xs:sequence>
+			<xs:element name="RateTypeCode" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:NMTOKEN">
+						<xs:enumeration value="Percentage"/>
+						<xs:enumeration value="Amount"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:choice>
+				<xs:element name="TaxAmount" type="Amount_type"/>
+				<xs:element name="TaxPercentageRate">
+					<xs:simpleType>
+						<xs:restriction base="xs:decimal">
+							<xs:fractionDigits value="5"/>
+						</xs:restriction>
+					</xs:simpleType>
+				</xs:element>
+			</xs:choice>
+			<xs:element name="TaxAboveThresholdAmountFlag" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:NMTOKEN">
+						<xs:enumeration value="TaxAboveThresholdAmount"/>
+						<xs:enumeration value="TaxEntireAmount"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="ThresholdAmount" type="Amount_type" minOccurs="0"/>
+			<xs:element name="TaxRateEffectiveTimestamp" type="xs:dateTime" minOccurs="0"/>
+			<xs:element name="TaxRateExpirationTimestamp" type="xs:dateTime" minOccurs="0"/>
+			<xs:element name="MinimumTaxableAmount" type="Amount_type" minOccurs="0"/>
+			<xs:element name="MaximumTaxableAmount" minOccurs="0">
+				<xs:simpleType>
+					<xs:restriction base="xs:decimal">
+						<xs:fractionDigits value="2"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="GEOCode_type">
+		<xs:sequence>
+			<xs:element name="GeoCodeID" type="xs:string"/>
+			<xs:element name="TaxJurisdictionName" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="GEOTaxJurisdiction_type">
+		<xs:sequence>
+			<xs:element name="GeoCodeID" type="xs:string"/>
+			<xs:element name="PostalCode" type="xs:string"/>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:simpleType name="FillType_subtype">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="KillAndFill"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>
